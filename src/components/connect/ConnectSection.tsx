@@ -6,7 +6,7 @@ import { CONNECT_LINKS, generateConnectUrl } from '@/lib/constants';
 
 interface ConnectSectionProps {
   activeSection?: string;
-  sectionRef: (el: HTMLElement | null) => void;
+  sectionRef?: (el: HTMLElement | null) => void;
 }
 
 export const ConnectSection = memo(function ConnectSection({ activeSection = '', sectionRef }: ConnectSectionProps) {
