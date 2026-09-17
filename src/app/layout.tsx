@@ -108,7 +108,7 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
+          defaultTheme="dark"
           disableTransitionOnChange
           enableSystem={false}
           storageKey="portfolio-theme"

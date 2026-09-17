@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { CommandPalette } from '@/features/tools/components/CommandPalette';
 
 import { cn } from '@/lib/utils';
 interface NavItem {
@@ -120,6 +121,7 @@ export function HeaderNavigation() {
             );
           })}
         </nav>
+        <CommandPalette />
 
         {/* Mobile Menu Toggle */}
         <button
