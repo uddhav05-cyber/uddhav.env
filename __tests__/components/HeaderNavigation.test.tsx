@@ -4,6 +4,7 @@ import { HeaderNavigation } from '@/components/navigation/HeaderNavigation';
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
   usePathname: jest.fn(() => '/'),
+  useRouter: jest.fn(() => ({ push: jest.fn() })),
 }));
 
 describe('HeaderNavigation', () => {
