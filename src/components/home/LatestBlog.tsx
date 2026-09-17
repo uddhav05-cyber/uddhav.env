@@ -8,7 +8,7 @@ import { getLatestBlogPosts } from '@/app/actions/blog';
 import type { BlogPostMetadata } from '@/features/blog/module/types';
 
 interface LatestBlogProps {
-    sectionRef: (el: HTMLElement | null) => void;
+    sectionRef?: (el: HTMLElement | null) => void;
 }
 
 export const LatestBlog = memo(function LatestBlog({ sectionRef }: LatestBlogProps) {
