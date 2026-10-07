@@ -105,7 +105,10 @@ export function ExperienceSection() {
 }
 
 export function SelectedWork() {
-  const projects = [PROJECT_DATA[0], PROJECT_DATA[3], PROJECT_DATA[4]].filter(Boolean);
+  const featuredProjectIds = ['recover-ai', 'autonomous-coding-agent', 'bharat-setu'];
+  const projects = featuredProjectIds
+    .map((id) => PROJECT_DATA.find((project) => project.id === id))
+    .filter((project): project is (typeof PROJECT_DATA)[number] => Boolean(project));
   return (
     <Row id="projects" index="03" label="Tools & Projects">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -132,7 +135,7 @@ export function SelectedWork() {
             : <article key={project.id} className={cls}>{body}</article>;
         })}
       </div>
-      <p className="mt-6 font-mono text-xs uppercase tracking-wider"><Link href="/project" className="hover:text-primary">All projects →</Link></p>
+      <p className="mt-6 font-mono text-xs uppercase tracking-wider"><a href="https://github.com/uddhavbhople" target="_blank" rel="noopener noreferrer" className="hover:text-primary">All projects →</a></p>
     </Row>
   );
 }

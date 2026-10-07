@@ -4,6 +4,20 @@ import matter from 'gray-matter';
 import { BlogPost, BlogPostMetadata } from './types';
 
 const postsDirectory = path.join(process.cwd(), 'content/posts');
+const REMOVED_BLOG_TAGS = new Set([
+    'Career',
+    'Cybersecurity',
+    'Data Engineering',
+    'DevSecOps',
+    'EARS',
+    'GPU',
+    'Infrastructure',
+    'Integration',
+    'MDX',
+    'Portfolio',
+    'Personal',
+    'Productivity',
+]);
 
 export function getPostSlugs() {
     if (!fs.existsSync(postsDirectory)) return [];
@@ -33,7 +47,9 @@ export function getPostBySlug(slug: string): BlogPost {
         coverImage: data.coverImage,
         coverImageCaption: data.coverImageCaption,
         content,
-        tags: data.tags,
+        tags: Array.isArray(data.tags)
+            ? data.tags.filter((tag): tag is string => typeof tag === 'string' && !REMOVED_BLOG_TAGS.has(tag))
+            : [],
         readingTime: data.readingTime || readingTime,
     } as BlogPost;
 }

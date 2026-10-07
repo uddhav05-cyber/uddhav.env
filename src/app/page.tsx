@@ -1,5 +1,7 @@
 import { ConnectSection } from '@/components/connect/ConnectSection';
 import { AboutSection, ExperienceSection, NowFocus, RecruiterHero, SelectedWork } from '@/components/home/RecruiterHome';
+import { SiteFooter } from '@/components/home/SiteFooter';
+import { LatestBlog } from '@/components/home/LatestBlog';
 
 export default function Home() {
   return (
@@ -8,12 +10,10 @@ export default function Home() {
       <AboutSection />
       <ExperienceSection />
       <SelectedWork />
+      <LatestBlog />
       <NowFocus />
       <ConnectSection />
-      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border py-8 font-mono text-xs text-muted-foreground">
-        <span>© {new Date().getFullYear()} Uddhav Bhople</span>
-        <span>Pune · UTC+05:30</span>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }

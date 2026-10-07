@@ -29,10 +29,10 @@ const SITE_URL =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Uddhav Bhople - AI Agents Developer',
+  default: 'Uddhav Bhople | AI Agents & Software Engineer',
     template: '%s | Uddhav Bhople',
   },
-  description: 'Computer Engineering student building AI agents and realtime products with Python, Next.js and modern web technologies.',
+  description: 'Uddhav Bhople is an AI agents and software engineer building reliable agentic systems, realtime products, and full-stack applications with Python, TypeScript, and Next.js.',
   keywords: ['AI/ML Developer', 'Full Stack Developer', 'Python', 'React', 'Next.js', 'TypeScript', 'TensorFlow', 'FastAPI', 'Flask', 'Computer Engineering'],
   authors: [
     { name: 'Uddhav Bhople', url: PRODUCTION_SITE_URL },
@@ -42,8 +42,8 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: PRODUCTION_SITE_URL,
-    title: 'Uddhav Bhople - AI Agents Developer',
-    description: 'Computer Engineering student building AI agents and realtime products with Python, Next.js and modern web technologies.',
+    title: 'Uddhav Bhople | AI Agents & Software Engineer',
+    description: 'AI agents and software engineering portfolio featuring reliable agentic systems, realtime products, Python, TypeScript, and Next.js applications.',
     siteName: 'Uddhav Bhople',
     images: [
       {
@@ -56,13 +56,13 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Uddhav Bhople - AI Agents Developer',
-    description: 'Computer Engineering student building AI agents and realtime products with Python, Next.js and modern web technologies.',
+    title: 'Uddhav Bhople | AI Agents & Software Engineer',
+    description: 'AI agents and software engineering portfolio featuring reliable agentic systems, realtime products, Python, TypeScript, and Next.js applications.',
     images: [`${PRODUCTION_SITE_URL}/og-image.png`],
     creator: '@uddhavbhople',
   },
   icons: {
-    icon: [{ url: '/logo.ico', sizes: '16x16', type: 'image/png' }],
+    icon: [{ url: '/favicon.ico', sizes: '16x16', type: 'image/png' }],
     shortcut: '/favicon.ico',
     apple: '/apple-touch-icon.png',
   },
