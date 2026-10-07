@@ -7,6 +7,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import { PROJECT_DATA } from '@/features/projects/infrastructure/projectData';
 import { EXPERIENCES } from '@/lib/constants/experiences';
+import { TypewriterHeadline } from './TypewriterHeadline';
 
 function Row({ id, index, label, children }: { id: string; index: string; label: string; children: ReactNode }) {
   return (
@@ -41,9 +42,7 @@ export function RecruiterHero() {
         transition={{ duration: 0.4, ease: 'easeOut' }}
       >
         <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Pune, India · Available for the next hard problem</p>
-        <h1 className="mt-7 font-display text-[clamp(2.75rem,8.5vw,6.5rem)] leading-[0.98] tracking-[-0.02em]">
-          I build AI agents that <em className="text-primary">do the work,</em> not just answer.
-        </h1>
+        <TypewriterHeadline />
         <p className="mt-9 max-w-xl text-lg leading-8">
           Computer Engineering student building agentic systems and realtime products: software that listens, reasons, uses tools and gets a real task finished.
         </p>
@@ -58,7 +57,11 @@ export function RecruiterHero() {
 }
 
 export function AboutSection() {
-  const facts = [['8.64', 'CGPA'], ['117', 'Azure badges'], ['2', 'AI/ML internships']];
+  const facts = [
+    ['90+', 'Google Skill Badges'],
+    ['4', 'Certifications'],
+    ['2', 'Internships'],
+  ];
   return (
     <Row id="about" index="01" label="About">
       <h2 className="font-display text-4xl leading-tight">Hi, I&apos;m Uddhav.</h2>
