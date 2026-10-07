@@ -1,27 +1,147 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowUpRight, Circle, ExternalLink, FileText } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { PROJECT_DATA } from '@/features/projects/infrastructure/projectData';
+import { EXPERIENCES } from '@/lib/constants/experiences';
+
+function Row({ id, index, label, children }: { id: string; index: string; label: string; children: ReactNode }) {
+  return (
+    <section id={id} className="grid scroll-mt-20 gap-3 border-t border-border py-12 sm:py-16 md:grid-cols-[180px_1fr] md:gap-6">
+      <p className="pt-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+        <span className="mb-1 block text-primary">{index}</span>
+        {label}
+      </p>
+      <div>{children}</div>
+    </section>
+  );
+}
+
+function Chips({ items }: { items: string[] }) {
+  if (!items.length) return null;
+  return (
+    <div className="mt-4 flex flex-wrap gap-2">
+      {items.map((item) => (
+        <span key={item} className="rounded-full border border-border px-3 py-0.5 text-xs text-muted-foreground">{item}</span>
+      ))}
+    </div>
+  );
+}
 
 export function RecruiterHero() {
   const reduceMotion = useReducedMotion();
-  return <section id="intro" className="grid min-h-[calc(100vh-6rem)] items-center gap-10 py-28 lg:grid-cols-[1.25fr_.75fr]">
-    <motion.div initial={reduceMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: 'easeOut' }} className="max-w-3xl">
-      <div className="mb-7 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.16em] text-[var(--accent-green)]"><Circle className="h-2.5 w-2.5 fill-current" /> Available for the next hard problem</div>
-      <p className="mb-5 font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">$ whoami</p>
-      <h1 className="text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-7xl">Uddhav Bhople builds practical AI systems and web products that ship.</h1>
-      <p className="mt-7 max-w-2xl text-lg leading-8 text-muted-foreground">Computer Engineering student focused on turning ambiguous workflows into useful software — from real-time learning tools to production-ready web experiences.</p>
-      <div className="mt-9 flex flex-wrap gap-3"><Link href="#selected-work" className="inline-flex min-h-11 items-center gap-2 rounded-md bg-[var(--accent-green)] px-5 py-3 text-sm font-semibold text-[#04110a] transition-transform hover:-translate-y-0.5">View work <ArrowUpRight className="h-4 w-4" /></Link><Link href="/resume" className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border bg-card px-5 py-3 text-sm font-semibold hover:border-[var(--accent-cyan)]"><FileText className="h-4 w-4" /> Resume</Link></div>
-    </motion.div>
-    <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-lg border border-border bg-card p-3 shadow-2xl"><div className="absolute left-0 top-0 h-1 w-1/2 bg-[var(--accent-green)]" /><Image src="/portrait.jpg" alt="Uddhav Bhople" width={640} height={640} priority sizes="(min-width: 1024px) 28rem, 80vw" className="aspect-square w-full object-cover grayscale transition duration-500 hover:grayscale-0" /><div className="mt-3 flex justify-between font-mono text-[11px] uppercase tracking-wider text-muted-foreground"><span>Pune, IN</span><span>UTC +05:30</span></div></div>
-  </section>;
+  return (
+    <section id="intro" className="pb-16 pt-32 sm:pb-24 sm:pt-40">
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+      >
+        <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Pune, India · Available for the next hard problem</p>
+        <h1 className="mt-7 font-display text-[clamp(2.75rem,8.5vw,6.5rem)] leading-[0.98] tracking-[-0.02em]">
+          I build AI agents that <em className="text-primary">do the work,</em> not just answer.
+        </h1>
+        <p className="mt-9 max-w-xl text-lg leading-8">
+          Computer Engineering student building agentic systems and realtime products: software that listens, reasons, uses tools and gets a real task finished.
+        </p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link href="#projects" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-foreground bg-foreground px-5 text-sm text-background transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground">View work <ArrowUpRight className="h-4 w-4" /></Link>
+          <Link href="/resume" className="inline-flex min-h-11 items-center rounded-full border border-foreground px-5 text-sm transition-colors hover:border-primary hover:text-primary">Resume</Link>
+          <Link href="#service" className="inline-flex min-h-11 items-center rounded-full border border-foreground px-5 text-sm transition-colors hover:border-primary hover:text-primary">Get in touch</Link>
+        </div>
+      </motion.div>
+    </section>
+  );
 }
 
-export function ProofStrip() { return <section aria-label="Career proof" className="border-y border-border py-5"><p className="mb-4 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Selected affiliations</p><div className="grid grid-cols-2 gap-4 sm:grid-cols-4">{['D. Y. Patil College of Engineering', 'Microsoft Learn Student Ambassador', 'Google Student Ambassador', 'NSDC / EduSkills'].map((name) => <div key={name} className="border-l border-border pl-3 text-sm font-medium leading-5">{name}</div>)}</div></section>; }
+export function AboutSection() {
+  const facts = [['8.64', 'CGPA'], ['117', 'Azure badges'], ['2', 'AI/ML internships']];
+  return (
+    <Row id="about" index="01" label="About">
+      <h2 className="font-display text-4xl leading-tight">Hi, I&apos;m Uddhav.</h2>
+      <p className="mt-5 max-w-2xl text-lg leading-8">
+        I&apos;m a B.Tech Computer Engineering student in Pune who got hooked on AI the moment a model did something I didn&apos;t expect. Since then I&apos;ve been building: realtime classroom tools, learning platforms and small ML projects, and writing about what breaks along the way.
+      </p>
+      <p className="mt-4 max-w-2xl text-lg leading-8">
+        My goal is to build AI agents that are reliable enough to trust with real work, and to grow into a team that ships them at scale.
+      </p>
+      <dl className="mt-8 grid max-w-xl grid-cols-3 gap-4">
+        {facts.map(([value, label]) => (
+          <div key={label}>
+            <dd className="font-display text-4xl text-primary">{value}</dd>
+            <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">{label}</dt>
+          </div>
+        ))}
+      </dl>
+    </Row>
+  );
+}
 
-export function SelectedWork() { const projects = [PROJECT_DATA[0], PROJECT_DATA[3], PROJECT_DATA[4]]; return <section id="selected-work" className="py-24"><div className="mb-10 flex flex-wrap items-end justify-between gap-4"><div><p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-cyan)]">$ ls projects/</p><h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Selected work, with context.</h2></div><Link href="/project" className="text-sm font-medium text-muted-foreground hover:text-foreground">All projects →</Link></div><div className="grid gap-5 lg:grid-cols-3">{projects.map((project) => <article key={project.id} className="group overflow-hidden rounded-lg border border-border bg-card"><div className="relative aspect-[16/10] overflow-hidden"><Image src={project.image} alt={`${project.title} interface`} fill sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover transition duration-300 group-hover:scale-[1.03]" /><div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#070909] p-4 pt-12"><span className="font-mono text-[10px] uppercase tracking-widest text-[var(--accent-green)]">{project.categories[0]}</span></div></div><div className="p-5"><div className="flex items-start justify-between gap-4"><h3 className="text-lg font-semibold">{project.title}</h3>{project.link ? <a href={project.link} target="_blank" rel="noreferrer" aria-label={`Open ${project.title}`} className="text-[var(--accent-cyan)]"><ExternalLink className="h-4 w-4" /></a> : null}</div><p className="mt-3 text-sm leading-6 text-muted-foreground">{project.summary}</p><div className="mt-5 flex flex-wrap gap-2">{project.languages.slice(0, 4).map((item) => <span key={item} className="rounded border border-border px-2 py-1 font-mono text-[10px] text-muted-foreground">{item}</span>)}</div></div></article>)}</div></section>; }
+export function ExperienceSection() {
+  return (
+    <Row id="experience" index="02" label="Experience">
+      <ol className="border-t border-border">
+        {EXPERIENCES.slice(0, 4).map((item) => (
+          <li key={`${item.company}-${item.year}`} className="border-b border-border py-6">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <h3 className="font-display text-2xl leading-tight">{item.role}</h3>
+              <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">{item.year}</span>
+            </div>
+            <p className="mt-1 font-mono text-xs uppercase tracking-wider text-primary">{item.company}</p>
+            <p className="mt-3 max-w-2xl text-[15px] leading-7 text-muted-foreground">{item.description}</p>
+            <Chips items={item.tech} />
+          </li>
+        ))}
+      </ol>
+      <p className="mt-6 font-mono text-xs uppercase tracking-wider"><Link href="/experience" className="hover:text-primary">Full experience →</Link></p>
+    </Row>
+  );
+}
 
-export function NowFocus() { return <section className="grid gap-6 border-y border-border py-16 md:grid-cols-[.7fr_1.3fr]"><div><p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-green)]">now / focus</p><h2 className="mt-3 text-3xl font-semibold tracking-tight">What I&apos;m building toward.</h2></div><div className="space-y-5"><p className="text-lg leading-8 text-muted-foreground">Exploring real-time AI interfaces and dependable product infrastructure — with special attention to how people actually learn, decide, and get work done.</p><div className="flex flex-wrap gap-3 font-mono text-xs"><span className="rounded border border-border px-3 py-2">Realtime systems</span><span className="rounded border border-border px-3 py-2">Applied ML</span><span className="rounded border border-border px-3 py-2">Next.js architecture</span></div></div></section>; }
+export function SelectedWork() {
+  const projects = [PROJECT_DATA[0], PROJECT_DATA[3], PROJECT_DATA[4]].filter(Boolean);
+  return (
+    <Row id="projects" index="03" label="Tools & Projects">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {projects.map((project, i) => {
+          const body = (
+            <>
+              <div className="relative aspect-video overflow-hidden border-b border-border bg-background">
+                <Image src={project.image} alt={`${project.title} screenshot`} fill sizes="(min-width: 1024px) 30vw, 100vw" className="object-cover object-top" />
+              </div>
+              <div className="flex flex-1 flex-col p-6">
+                <div className="mb-3 flex justify-between font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                  <span>0{i + 1}</span>
+                  <span className="group-hover:text-primary">{project.link ? 'View ↗' : ''}</span>
+                </div>
+                <h3 className="font-display text-2xl leading-tight">{project.title}</h3>
+                <p className="mt-2 flex-1 text-[15px] leading-7 text-muted-foreground">{project.summary}</p>
+                <Chips items={project.languages.slice(0, 5)} />
+              </div>
+            </>
+          );
+          const cls = 'group flex flex-col overflow-hidden rounded-md border border-border bg-card transition duration-200 hover:-translate-y-0.5 hover:border-primary';
+          return project.link
+            ? <a key={project.id} href={project.link} target="_blank" rel="noreferrer" className={cls}>{body}</a>
+            : <article key={project.id} className={cls}>{body}</article>;
+        })}
+      </div>
+      <p className="mt-6 font-mono text-xs uppercase tracking-wider"><Link href="/project" className="hover:text-primary">All projects →</Link></p>
+    </Row>
+  );
+}
+
+export function NowFocus() {
+  return (
+    <Row id="now" index="04" label="Now / Focus">
+      <div className="rounded-md border border-border border-l-[3px] border-l-primary bg-card p-8">
+        <h2 className="font-display text-4xl leading-tight">What I&apos;m building toward.</h2>
+        <p className="mt-4 max-w-2xl text-lg leading-8">AI agents that take real actions, realtime AI interfaces, and the dependable infrastructure underneath them.</p>
+        <Chips items={['AI agents', 'Realtime systems', 'Applied ML', 'Next.js architecture']} />
+      </div>
+    </Row>
+  );
+}

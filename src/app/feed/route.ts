@@ -5,7 +5,7 @@ import { getAllPosts } from '@/features/blog/module/service';
  * Alternative route for /feed.xml
  */
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://uddhavbhople.dev';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.uddhavbhople.in';
   const posts = getAllPosts();
 
   const rss = `<?xml version="1.0" encoding="UTF-8"?>

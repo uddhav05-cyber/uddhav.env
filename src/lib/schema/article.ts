@@ -49,7 +49,7 @@ export function getArticleSchema({
   slug,
   author = 'Uddhav Bhople',
 }: ArticleSchemaProps): ArticleSchema {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://uddhavbhople.dev';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.uddhavbhople.in';
   const url = `${baseUrl}/blog/${slug}`;
 
   return {

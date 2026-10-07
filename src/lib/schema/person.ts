@@ -25,7 +25,7 @@ export interface PersonSchema {
 }
 
 export function getPersonSchema(): PersonSchema {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://uddhavbhople.dev';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.uddhavbhople.in';
 
   return {
     '@context': 'https://schema.org',
@@ -37,7 +37,7 @@ export function getPersonSchema(): PersonSchema {
     sameAs: [
       'https://github.com/uddhav05-cyber',
       'https://www.linkedin.com/in/uddhav-bhople/',
-      'https://uddhavbhople.dev',
+      'https://www.uddhavbhople.in',
     ],
     image: `${baseUrl}/portrait.jpg`,
     description:

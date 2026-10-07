@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { CommandPalette } from '@/features/tools/components/CommandPalette';
 
 import { cn } from '@/lib/utils';
@@ -14,46 +15,10 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  {
-    label: 'Experience',
-    href: '/experience',
-    isActive: (pathname) => pathname === '/experience',
-  },
-  // {
-  //   label: 'Honors',
-  //   href: '/honors-awards',
-  //   isActive: (pathname) => pathname === '/honors-awards',
-  // },
-  {
-    label: 'Tools & Projects',
-    href: '/project',
-    isActive: (pathname) => pathname === '/project',
-  },
-  /*{
-    label: 'Certificate',
-    href: '/certificates',
-    isActive: (pathname) => pathname.startsWith('/certificates'),
-  },*/
-  {
-    label: 'Blog',
-    href: '/blog',
-    isActive: (pathname) => pathname === '/blog' || pathname.startsWith('/blog/'),
-  },
-  {
-    label: 'Contact',
-    href: 'mailto:uddhavbhople5@gmail.com',
-    isActive: () => false,
-  },
-  // {
-  //   label: 'Uses',
-  //   href: '/uses',
-  //   isActive: (pathname) => pathname === '/uses',
-  // },
-  // {
-  //   label: 'Resume',
-  //   href: '/resume',
-  //   isActive: (pathname) => pathname === '/resume',
-  // },
+  { label: 'About', href: '/#about', isActive: () => false },
+  { label: 'Experience', href: '/#experience', isActive: (pathname) => pathname === '/experience' },
+  { label: 'Projects', href: '/#projects', isActive: (pathname) => pathname === '/project' },
+  { label: 'Contact', href: '/#service', isActive: () => false },
 ];
 
 export function HeaderNavigation() {
@@ -81,16 +46,16 @@ export function HeaderNavigation() {
   );
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 flex justify-center print:hidden">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur print:hidden">
       <div
         className={cn(
-          'relative z-50 mt-4 flex w-[95%] max-w-5xl items-center justify-between gap-6 rounded-full border border-border/60 bg-background/80 px-6 py-3 backdrop-blur shadow-lg transition-all duration-500',
+          'relative z-50 mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-6 px-5 sm:px-8',
           visibilityClasses
         )}
       >
         <Link
           href="/"
-          className="text-xs font-semibold uppercase tracking-[0.2em] md:tracking-[0.5em] text-muted-foreground transition-colors hover:text-foreground z-50"
+          className="font-display text-2xl leading-none text-foreground transition-colors hover:text-primary z-50"
           onClick={() => setIsMobileMenuOpen(false)}
         >
           Uddhav Bhople
@@ -110,8 +75,8 @@ export function HeaderNavigation() {
                 target={isExternal ? '_blank' : undefined}
                 rel={isExternal ? 'noopener noreferrer' : undefined}
                 className={cn(
-                  'text-xs font-semibold uppercase tracking-[0.2em] lg:tracking-[0.4em] transition-all duration-300',
-                  'hover:text-foreground hover:scale-110',
+                  'font-mono text-xs uppercase tracking-wider transition-colors duration-200',
+                  'hover:text-primary',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                   active ? 'text-foreground' : 'text-muted-foreground'
                 )}
@@ -121,7 +86,7 @@ export function HeaderNavigation() {
             );
           })}
         </nav>
-        <CommandPalette />
+        <div className="flex items-center gap-3"><CommandPalette /><ThemeToggle /></div>
 
         {/* Mobile Menu Toggle */}
         <button
@@ -162,9 +127,9 @@ export function HeaderNavigation() {
                 target={isExternal ? '_blank' : undefined}
                 rel={isExternal ? 'noopener noreferrer' : undefined}
                 className={cn(
-                  'text-lg font-semibold uppercase tracking-[0.4em] transition-all duration-300 transform',
+                  'font-display text-4xl transition-all duration-300 transform',
                   isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0',
-                  'hover:text-primary hover:scale-110',
+                  'hover:text-primary',
                   active ? 'text-foreground' : 'text-muted-foreground'
                 )}
                 style={{ transitionDelay: `${index * 100}ms` }}
