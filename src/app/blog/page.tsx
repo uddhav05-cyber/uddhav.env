@@ -1,5 +1,6 @@
 import { getAllPosts } from '@/features/blog/module/service';
 import { BlogList } from '@/features/blog/components/BlogList';
+import { linkedInPosts } from '@/data/linkedInPosts';
 
 export const metadata = {
     title: 'Blog',
@@ -14,7 +15,7 @@ export const metadata = {
 export default async function BlogPage() {
     const posts = getAllPosts();
     // Extract unique tags
-    const allTags = Array.from(new Set(posts.flatMap(post => post.tags || []))).sort();
+    const allTags = Array.from(new Set(posts.flatMap((post) => post.tags || []))).sort();
 
     return (
         <div className="container pt-24 pb-12 md:py-24 space-y-12 max-w-6xl mx-auto px-4">
@@ -45,7 +46,11 @@ export default async function BlogPage() {
                 </p>
             </div>
 
-            <BlogList initialPosts={posts} allTags={allTags} />
+            <BlogList
+                initialPosts={posts}
+                allTags={allTags}
+                linkedInPosts={linkedInPosts}
+            />
         </div>
     );
 }

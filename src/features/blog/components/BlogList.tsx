@@ -6,13 +6,21 @@ import { BlogCard } from './BlogCard';
 import { Search } from 'lucide-react';
 import { ProjectPagination as Pagination } from '@/features/projects/components/ProjectPagination';
 import { cn } from '@/lib/utils';
+import type { LinkedInPost } from '@/data/linkedInPosts';
+import { devToPosts } from '@/data/devToPosts';
 
 interface BlogListProps {
     initialPosts: BlogPostMetadata[];
     allTags: string[];
+    linkedInPosts?: LinkedInPost[];
 }
 
-export function BlogList({ initialPosts, allTags }: BlogListProps) {
+export function BlogList({
+    initialPosts,
+    allTags,
+    linkedInPosts = [],
+}: BlogListProps) {
+    const [activeTab, setActiveTab] = useState<'articles' | 'linkedin' | 'devto'>('articles');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTag, setSelectedTag] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -44,6 +52,112 @@ export function BlogList({ initialPosts, allTags }: BlogListProps) {
 
     return (
         <div className="space-y-10">
+            <div className="flex justify-center gap-2" role="tablist" aria-label="Blog content type">
+                <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === 'articles'}
+                    onClick={() => setActiveTab('articles')}
+                    className={cn(
+                        'rounded-full border px-4 py-2 text-sm font-medium transition-colors',
+                        activeTab === 'articles'
+                            ? 'border-primary bg-primary text-primary-foreground'
+                            : 'border-border text-muted-foreground hover:text-foreground'
+                    )}
+                >
+                    Articles
+                </button>
+                <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === 'linkedin'}
+                    onClick={() => setActiveTab('linkedin')}
+                    className={cn(
+                        'rounded-full border px-4 py-2 text-sm font-medium transition-colors',
+                        activeTab === 'linkedin'
+                            ? 'border-primary bg-primary text-primary-foreground'
+                            : 'border-border text-muted-foreground hover:text-foreground'
+                    )}
+                >
+                    LinkedIn Insights / Posts
+                </button>
+                <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === 'devto'}
+                    onClick={() => setActiveTab('devto')}
+                    className={cn(
+                        'rounded-full border px-4 py-2 text-sm font-medium transition-colors',
+                        activeTab === 'devto'
+                            ? 'border-primary bg-primary text-primary-foreground'
+                            : 'border-border text-muted-foreground hover:text-foreground'
+                    )}
+                >
+                    Dev.to Articles
+                </button>
+            </div>
+
+            {activeTab === 'linkedin' ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" role="tabpanel">
+                    {linkedInPosts.map((post) => (
+                        <article
+                            key={post.id}
+                            className="group flex flex-col rounded-xl border border-border bg-card p-6 text-card-foreground shadow-sm transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-md"
+                        >
+                            <div className="flex items-start justify-between gap-4">
+                                <span className="rounded-md bg-blue-500/10 px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-blue-500">
+                                    {post.topicTag}
+                                </span>
+                                <time className="shrink-0 text-xs text-muted-foreground">{post.date}</time>
+                            </div>
+                            <h2 className="mt-5 text-xl font-semibold tracking-tight transition-colors group-hover:text-primary">
+                                {post.title}
+                            </h2>
+                            <p className="mt-3 flex-1 leading-7 text-muted-foreground">{post.snippet}</p>
+                            <a
+                                href={post.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-6 inline-flex w-fit items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                            >
+                                Read on LinkedIn ↗
+                            </a>
+                        </article>
+                    ))}
+                </div>
+            ) : activeTab === 'devto' ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" role="tabpanel">
+                {devToPosts.map((post) => (
+                    <article
+                        key={post.id}
+                        className="group flex flex-col rounded-xl border border-border bg-card p-6 text-card-foreground shadow-sm transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-md"
+                    >
+                        <div className="flex items-start justify-between gap-4">
+                            <span className="rounded-md bg-blue-500/10 px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-blue-500">
+                                {post.topicTag}
+                            </span>
+                            <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+                                <time>{post.date}</time>
+                                {post.readingTime && <span>{post.readingTime}</span>}
+                            </div>
+                        </div>
+                        <h2 className="mt-5 text-xl font-semibold tracking-tight transition-colors group-hover:text-primary">
+                            {post.title}
+                        </h2>
+                        <p className="mt-3 flex-1 leading-7 text-muted-foreground">{post.snippet}</p>
+                        <a
+                            href={post.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-6 inline-flex w-fit items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                        >
+                            Read on Dev.to ↗
+                        </a>
+                    </article>
+                ))}
+                </div>
+            ) : (
+                <>
             {/* Filters Section */}
             <div className="space-y-6">
                 {/* Search Input */}
@@ -128,6 +242,8 @@ export function BlogList({ initialPosts, allTags }: BlogListProps) {
                         Clear all filters
                     </button>
                 </div>
+            )}
+                </>
             )}
         </div>
     );
