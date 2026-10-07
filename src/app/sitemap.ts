@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { getAllPosts } from '@/features/blog/module/service';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://uddhavbhople.dev';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.uddhavbhople.in';
   const currentDate = new Date();
 
   // Get all blog posts

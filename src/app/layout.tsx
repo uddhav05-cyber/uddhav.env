@@ -1,7 +1,7 @@
 import type React from 'react';
 import type { Metadata } from 'next';
 import Script from 'next/script';
-import { Geist } from 'next/font/google';
+import { Inter, Instrument_Serif, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { HeaderNavigation } from '@/components/navigation/HeaderNavigation';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -15,13 +15,12 @@ import { getPersonSchema } from '@/lib/schema/person';
 
 
 
-const geist = Geist({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-geist',
-});
+const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
+const instrument = Instrument_Serif({ subsets: ['latin'], weight: '400', style: ['normal', 'italic'], display: 'swap', variable: '--font-instrument' });
+const jetbrains = JetBrains_Mono({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-jetbrains' });
 
-const PRODUCTION_SITE_URL = 'https://uddhavbhople.dev';
+// One canonical domain everywhere (metadata, OG, sitemap). Change here if you move domains.
+const PRODUCTION_SITE_URL = 'https://www.uddhavbhople.in';
 const SITE_URL =
   process.env.NODE_ENV === 'development'
     ? 'http://localhost:3000'
@@ -30,21 +29,21 @@ const SITE_URL =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Uddhav Bhople - Computer Engineering Student & AI/ML Developer',
+    default: 'Uddhav Bhople - AI Agents Developer',
     template: '%s | Uddhav Bhople',
   },
-  description: 'Computer Engineering Student passionate about AI/ML and Full Stack Development. Experienced in building intelligent systems with Python, React, and modern web technologies.',
+  description: 'Computer Engineering student building AI agents and realtime products with Python, Next.js and modern web technologies.',
   keywords: ['AI/ML Developer', 'Full Stack Developer', 'Python', 'React', 'Next.js', 'TypeScript', 'TensorFlow', 'FastAPI', 'Flask', 'Computer Engineering'],
   authors: [
-    { name: 'Uddhav Bhople', url: 'https://uddhavbhople.dev/' },
+    { name: 'Uddhav Bhople', url: PRODUCTION_SITE_URL },
   ],
   creator: 'Uddhav Bhople',
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: PRODUCTION_SITE_URL,
-    title: 'Uddhav Bhople - Computer Engineering Student & AI/ML Developer',
-    description: 'Computer Engineering Student passionate about AI/ML and Full Stack Development. Building intelligent systems with Python, React, and modern web technologies.',
+    title: 'Uddhav Bhople - AI Agents Developer',
+    description: 'Computer Engineering student building AI agents and realtime products with Python, Next.js and modern web technologies.',
     siteName: 'Uddhav Bhople',
     images: [
       {
@@ -57,8 +56,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Uddhav Bhople - Computer Engineering Student & AI/ML Developer',
-    description: 'Computer Engineering Student passionate about AI/ML and Full Stack Development. Building intelligent systems with Python, React, and modern web technologies.',
+    title: 'Uddhav Bhople - AI Agents Developer',
+    description: 'Computer Engineering student building AI agents and realtime products with Python, Next.js and modern web technologies.',
     images: [`${PRODUCTION_SITE_URL}/og-image.png`],
     creator: '@uddhavbhople',
   },
@@ -93,14 +92,13 @@ export default function RootLayout({
   const personSchema = getPersonSchema();
 
   return (
-    <html lang="en" className={`${geist.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${instrument.variable} ${jetbrains.variable}`} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
         />
         {/* Preload critical resources */}
-        <link rel="preload" href="/portrait.jpg" as="image" />
         <link rel="dns-prefetch" href="https://github.com" />
         <link rel="dns-prefetch" href="https://avatars.githubusercontent.com" />
         <link rel="dns-prefetch" href="https://huggingface.co" />
@@ -108,9 +106,9 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="system"
           disableTransitionOnChange
-          enableSystem={false}
+          enableSystem
           storageKey="portfolio-theme"
         >
           <SkipLink />

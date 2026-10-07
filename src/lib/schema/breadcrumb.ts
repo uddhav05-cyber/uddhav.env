@@ -24,7 +24,7 @@ export interface BreadcrumbItemProps {
 export function getBreadcrumbSchema(
   items: BreadcrumbItemProps[]
 ): BreadcrumbListSchema {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://uddhavbhople.dev';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.uddhavbhople.in';
 
   return {
     '@context': 'https://schema.org',
