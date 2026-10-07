@@ -1,0 +1,904 @@
+diff --git a/src/app/api/contact/route.ts b/src/app/api/contact/route.ts
+new file mode 100644
+index 0000000..bf2ca5a
+--- /dev/null
++++ b/src/app/api/contact/route.ts
+@@ -0,0 +1,44 @@
++import { NextResponse } from 'next/server';
++import redis from '@/lib/redis';
++
++const TOPICS = ['Internship', 'Collaboration', 'Project', 'Just saying hi'];
++const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
++const MAX_PER_HOUR = 5;
++
++export async function POST(request: Request) {
++  let body: Record<string, unknown>;
++  try {
++    body = await request.json();
++  } catch {
++    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
++  }
++
++  // Honeypot: bots fill the hidden field. Pretend success.
++  if (typeof body.website === 'string' && body.website.length > 0) {
++    return NextResponse.json({ ok: true });
++  }
++
++  const topic = String(body.topic ?? '');
++  const name = String(body.name ?? '').trim();
++  const email = String(body.email ?? '').trim();
++  const message = String(body.message ?? '').trim();
++
++  if (!TOPICS.includes(topic) || name.length < 1 || name.length > 80 || !EMAIL_RE.test(email) || email.length > 120 || message.length < 5 || message.length > 2000) {
++    return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
++  }
++
++  try {
++    const ip = (request.headers.get('x-forwarded-for') ?? 'unknown').split(',')[0].trim();
++    const key = `contact:rl:${ip}`;
++    const count = await redis.incr(key);
++    if (count === 1) await redis.expire(key, 3600);
++    if (count > MAX_PER_HOUR) {
++      return NextResponse.json({ error: 'Too many messages' }, { status: 429 });
++    }
++    await redis.lpush('contact:messages', JSON.stringify({ topic, name, email, message, at: new Date().toISOString() }));
++    return NextResponse.json({ ok: true });
++  } catch {
++    // Redis not configured or unavailable: the client falls back to mailto.
++    return NextResponse.json({ error: 'Storage unavailable' }, { status: 503 });
++  }
++}
+diff --git a/src/app/feed.xml/route.ts b/src/app/feed.xml/route.ts
+index 5d31963..18fa20d 100644
+--- a/src/app/feed.xml/route.ts
++++ b/src/app/feed.xml/route.ts
+@@ -1,7 +1,7 @@
+ import { getAllPosts } from '@/features/blog/module/service';
+ 
+ export async function GET() {
+-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://uddhavbhople.dev';
++  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.uddhavbhople.in';
+   const posts = getAllPosts();
+ 
+   const rss = `<?xml version="1.0" encoding="UTF-8"?>
+diff --git a/src/app/feed/route.ts b/src/app/feed/route.ts
+index cac83de..e71cefa 100644
+--- a/src/app/feed/route.ts
++++ b/src/app/feed/route.ts
+@@ -5,7 +5,7 @@ import { getAllPosts } from '@/features/blog/module/service';
+  * Alternative route for /feed.xml
+  */
+ export async function GET() {
+-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://uddhavbhople.dev';
++  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.uddhavbhople.in';
+   const posts = getAllPosts();
+ 
+   const rss = `<?xml version="1.0" encoding="UTF-8"?>
+diff --git a/src/app/globals.css b/src/app/globals.css
+index fa57d91..05b8f0f 100644
+--- a/src/app/globals.css
++++ b/src/app/globals.css
+@@ -583,68 +583,70 @@
+   }
+ }
+ 
+-/* Terminal system tokens. Keep these as the single visual source of truth. */
++/* Editorial design tokens (light + dark). Single visual source of truth. */
+ :root,
++.light {
++  --background: #f4f0e8;
++  --foreground: #1a1814;
++  --card: #ebe5d8;
++  --card-foreground: #1a1814;
++  --popover: #f4f0e8;
++  --popover-foreground: #1a1814;
++  --primary: #d9431e;
++  --primary-foreground: #ffffff;
++  --secondary: #ebe5d8;
++  --secondary-foreground: #1a1814;
++  --muted: #ebe5d8;
++  --muted-foreground: #575247;
++  --accent: #ebe5d8;
++  --accent-foreground: #1a1814;
++  --border: #d8d2c4;
++  --input: #d8d2c4;
++  --ring: #d9431e;
++  --accent-green: #d9431e;
++  --accent-cyan: #d9431e;
++  --radius: 0.375rem;
++}
++
+ .dark {
+-  --bg-primary: #070909;
+-  --bg-elevated: #0d1212;
+-  --accent-green: #00ff87;
+-  --accent-cyan: #00e5ff;
+-  --text-primary: #f5f5f5;
+-  --text-muted: #8a8f98;
+-  --background: var(--bg-primary);
+-  --foreground: var(--text-primary);
+-  --card: var(--bg-elevated);
+-  --card-foreground: var(--text-primary);
+-  --popover: #101515;
+-  --popover-foreground: var(--text-primary);
+-  --primary: var(--accent-green);
+-  --primary-foreground: #04110a;
+-  --secondary: #151c1c;
+-  --secondary-foreground: var(--text-primary);
+-  --muted: #151c1c;
+-  --muted-foreground: var(--text-muted);
+-  --accent: #10231c;
+-  --accent-foreground: var(--accent-green);
+-  --border: #253131;
+-  --input: #182222;
+-  --ring: var(--accent-cyan);
+-  --radius: 0.5rem;
++  --background: #14130f;
++  --foreground: #ece7da;
++  --card: #1c1a15;
++  --card-foreground: #ece7da;
++  --popover: #1c1a15;
++  --popover-foreground: #ece7da;
++  --primary: #ff6a3d;
++  --primary-foreground: #14130f;
++  --secondary: #1c1a15;
++  --secondary-foreground: #ece7da;
++  --muted: #1c1a15;
++  --muted-foreground: #a8a291;
++  --accent: #1c1a15;
++  --accent-foreground: #ece7da;
++  --border: #2d2a22;
++  --input: #2d2a22;
++  --ring: #ff6a3d;
++  --accent-green: #ff6a3d;
++  --accent-cyan: #ff6a3d;
+ }
+ 
+-.light {
+-  --bg-primary: #f4f7f5;
+-  --bg-elevated: #ffffff;
+-  --text-primary: #0c1613;
+-  --text-muted: #52605a;
+-  --background: var(--bg-primary);
+-  --foreground: var(--text-primary);
+-  --card: var(--bg-elevated);
+-  --card-foreground: var(--text-primary);
+-  --popover: #ffffff;
+-  --popover-foreground: var(--text-primary);
+-  --primary: #057a45;
+-  --primary-foreground: #ffffff;
+-  --secondary: #e3ebe6;
+-  --secondary-foreground: var(--text-primary);
+-  --muted: #e8efea;
+-  --muted-foreground: var(--text-muted);
+-  --accent: #d8f7e7;
+-  --accent-foreground: #075b35;
+-  --border: #b7c8bf;
+-  --input: #dfe9e3;
+-  --ring: #008fa3;
++@theme inline {
++  --font-sans: var(--font-inter), system-ui, sans-serif;
++  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
++  --font-display: var(--font-instrument), Georgia, serif;
+ }
+ 
++body { font-family: var(--font-inter), system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
++
+ .terminal-grid {
+   background-image: linear-gradient(to right, color-mix(in srgb, var(--border) 45%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in srgb, var(--border) 45%, transparent) 1px, transparent 1px);
+   background-size: 48px 48px;
+   mask-image: linear-gradient(to bottom, black, transparent 78%);
+ }
+ 
+-::selection { background: var(--accent-green); color: #04110a; }
++::selection { background: var(--primary); color: var(--primary-foreground); }
+ 
+-:focus-visible { outline: 2px solid var(--accent-cyan); outline-offset: 3px; }
++:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+ 
+ @media (prefers-reduced-motion: reduce) {
+   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+diff --git a/src/app/layout.tsx b/src/app/layout.tsx
+index a1839ac..437249f 100644
+--- a/src/app/layout.tsx
++++ b/src/app/layout.tsx
+@@ -1,7 +1,7 @@
+ import type React from 'react';
+ import type { Metadata } from 'next';
+ import Script from 'next/script';
+-import { Geist } from 'next/font/google';
++import { Inter, Instrument_Serif, JetBrains_Mono } from 'next/font/google';
+ import './globals.css';
+ import { HeaderNavigation } from '@/components/navigation/HeaderNavigation';
+ import { ThemeProvider } from '@/components/theme-provider';
+@@ -15,13 +15,12 @@ import { getPersonSchema } from '@/lib/schema/person';
+ 
+ 
+ 
+-const geist = Geist({
+-  subsets: ['latin'],
+-  display: 'swap',
+-  variable: '--font-geist',
+-});
++const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
++const instrument = Instrument_Serif({ subsets: ['latin'], weight: '400', style: ['normal', 'italic'], display: 'swap', variable: '--font-instrument' });
++const jetbrains = JetBrains_Mono({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-jetbrains' });
+ 
+-const PRODUCTION_SITE_URL = 'https://uddhavbhople.dev';
++// One canonical domain everywhere (metadata, OG, sitemap). Change here if you move domains.
++const PRODUCTION_SITE_URL = 'https://www.uddhavbhople.in';
+ const SITE_URL =
+   process.env.NODE_ENV === 'development'
+     ? 'http://localhost:3000'
+@@ -30,21 +29,21 @@ const SITE_URL =
+ export const metadata: Metadata = {
+   metadataBase: new URL(SITE_URL),
+   title: {
+-    default: 'Uddhav Bhople - Computer Engineering Student & AI/ML Developer',
++    default: 'Uddhav Bhople - AI Agents Developer',
+     template: '%s | Uddhav Bhople',
+   },
+-  description: 'Computer Engineering Student passionate about AI/ML and Full Stack Development. Experienced in building intelligent systems with Python, React, and modern web technologies.',
++  description: 'Computer Engineering student building AI agents and realtime products with Python, Next.js and modern web technologies.',
+   keywords: ['AI/ML Developer', 'Full Stack Developer', 'Python', 'React', 'Next.js', 'TypeScript', 'TensorFlow', 'FastAPI', 'Flask', 'Computer Engineering'],
+   authors: [
+-    { name: 'Uddhav Bhople', url: 'https://uddhavbhople.dev/' },
++    { name: 'Uddhav Bhople', url: PRODUCTION_SITE_URL },
+   ],
+   creator: 'Uddhav Bhople',
+   openGraph: {
+     type: 'website',
+     locale: 'en_US',
+     url: PRODUCTION_SITE_URL,
+-    title: 'Uddhav Bhople - Computer Engineering Student & AI/ML Developer',
+-    description: 'Computer Engineering Student passionate about AI/ML and Full Stack Development. Building intelligent systems with Python, React, and modern web technologies.',
++    title: 'Uddhav Bhople - AI Agents Developer',
++    description: 'Computer Engineering student building AI agents and realtime products with Python, Next.js and modern web technologies.',
+     siteName: 'Uddhav Bhople',
+     images: [
+       {
+@@ -57,8 +56,8 @@ export const metadata: Metadata = {
+   },
+   twitter: {
+     card: 'summary_large_image',
+-    title: 'Uddhav Bhople - Computer Engineering Student & AI/ML Developer',
+-    description: 'Computer Engineering Student passionate about AI/ML and Full Stack Development. Building intelligent systems with Python, React, and modern web technologies.',
++    title: 'Uddhav Bhople - AI Agents Developer',
++    description: 'Computer Engineering student building AI agents and realtime products with Python, Next.js and modern web technologies.',
+     images: [`${PRODUCTION_SITE_URL}/og-image.png`],
+     creator: '@uddhavbhople',
+   },
+@@ -93,14 +92,13 @@ export default function RootLayout({
+   const personSchema = getPersonSchema();
+ 
+   return (
+-    <html lang="en" className={`${geist.variable}`} suppressHydrationWarning>
++    <html lang="en" className={`${inter.variable} ${instrument.variable} ${jetbrains.variable}`} suppressHydrationWarning>
+       <head>
+         <script
+           type="application/ld+json"
+           dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+         />
+         {/* Preload critical resources */}
+-        <link rel="preload" href="/portrait.jpg" as="image" />
+         <link rel="dns-prefetch" href="https://github.com" />
+         <link rel="dns-prefetch" href="https://avatars.githubusercontent.com" />
+         <link rel="dns-prefetch" href="https://huggingface.co" />
+@@ -108,9 +106,9 @@ export default function RootLayout({
+       <body suppressHydrationWarning>
+         <ThemeProvider
+           attribute="class"
+-          defaultTheme="dark"
++          defaultTheme="system"
+           disableTransitionOnChange
+-          enableSystem={false}
++          enableSystem
+           storageKey="portfolio-theme"
+         >
+           <SkipLink />
+diff --git a/src/app/page.tsx b/src/app/page.tsx
+index b1bf7fd..88c36e5 100644
+--- a/src/app/page.tsx
++++ b/src/app/page.tsx
+@@ -1,15 +1,19 @@
+ import { ConnectSection } from '@/components/connect/ConnectSection';
+-import { LatestBlog } from '@/components/home/LatestBlog';
+-import { NowFocus, ProofStrip, RecruiterHero, SelectedWork } from '@/components/home/RecruiterHome';
++import { AboutSection, ExperienceSection, NowFocus, RecruiterHero, SelectedWork } from '@/components/home/RecruiterHome';
+ 
+ export default function Home() {
+-  return <main id="main-content" className="mx-auto max-w-6xl px-5 sm:px-8">
+-    <RecruiterHero />
+-    <ProofStrip />
+-    <SelectedWork />
+-    <NowFocus />
+-    <LatestBlog />
+-    <ConnectSection />
+-    <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border py-8 font-mono text-xs text-muted-foreground"><span>© {new Date().getFullYear()} Uddhav Bhople</span><span>Built with Next.js · TypeScript · intention</span></footer>
+-  </main>;
++  return (
++    <main id="main-content" className="mx-auto max-w-6xl px-5 sm:px-8">
++      <RecruiterHero />
++      <AboutSection />
++      <ExperienceSection />
++      <SelectedWork />
++      <NowFocus />
++      <ConnectSection />
++      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border py-8 font-mono text-xs text-muted-foreground">
++        <span>© {new Date().getFullYear()} Uddhav Bhople</span>
++        <span>Pune · UTC+05:30</span>
++      </footer>
++    </main>
++  );
+ }
+diff --git a/src/app/robots.ts b/src/app/robots.ts
+index dddec57..bc90dca 100644
+--- a/src/app/robots.ts
++++ b/src/app/robots.ts
+@@ -1,7 +1,7 @@
+ import { MetadataRoute } from 'next';
+ 
+ export default function robots(): MetadataRoute.Robots {
+-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://uddhavbhople.dev';
++  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.uddhavbhople.in';
+ 
+   return {
+     rules: [
+diff --git a/src/app/sitemap.ts b/src/app/sitemap.ts
+index 08ee294..7493191 100644
+--- a/src/app/sitemap.ts
++++ b/src/app/sitemap.ts
+@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
+ import { getAllPosts } from '@/features/blog/module/service';
+ 
+ export default function sitemap(): MetadataRoute.Sitemap {
+-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://uddhavbhople.dev';
++  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.uddhavbhople.in';
+   const currentDate = new Date();
+ 
+   // Get all blog posts
+diff --git a/src/components/connect/ConnectSection.tsx b/src/components/connect/ConnectSection.tsx
+index f1a0854..c2cb7d5 100644
+--- a/src/components/connect/ConnectSection.tsx
++++ b/src/components/connect/ConnectSection.tsx
+@@ -1,86 +1,113 @@
+ 'use client';
+ 
+-import { memo } from 'react';
++import { memo, useState, type FormEvent } from 'react';
+ import Link from 'next/link';
++import { toast } from 'sonner';
+ import { CONNECT_LINKS, generateConnectUrl } from '@/lib/constants';
+ 
++const EMAIL = 'uddhavbhople5@gmail.com';
++const TOPICS = ['Internship', 'Collaboration', 'Project', 'Just saying hi'] as const;
++
+ interface ConnectSectionProps {
+   activeSection?: string;
+   sectionRef?: (el: HTMLElement | null) => void;
+ }
+ 
++const field = 'w-full rounded border border-border bg-card px-3 py-3 text-base outline-none focus:border-primary';
++
+ export const ConnectSection = memo(function ConnectSection({ activeSection = '', sectionRef }: ConnectSectionProps) {
++  const [topic, setTopic] = useState<(typeof TOPICS)[number]>(TOPICS[0]);
++  const [sending, setSending] = useState(false);
++
++  const openMail = (name: string, message: string) => {
++    const subject = encodeURIComponent(`${topic} — ${name}`);
++    const body = encodeURIComponent(`${message}\n\n— ${name}`);
++    window.location.href = `mailto:${EMAIL}?subject=${subject}&body=${body}`;
++  };
++
++  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
++    e.preventDefault();
++    const form = e.currentTarget;
++    const data = new FormData(form);
++    const name = String(data.get('name') ?? '').trim();
++    const email = String(data.get('email') ?? '').trim();
++    const message = String(data.get('message') ?? '').trim();
++    setSending(true);
++    try {
++      const res = await fetch('/api/contact', {
++        method: 'POST',
++        headers: { 'Content-Type': 'application/json' },
++        body: JSON.stringify({ topic, name, email, message, website: String(data.get('website') ?? '') }),
++      });
++      if (!res.ok) throw new Error(String(res.status));
++      toast.success('Message sent. I will reply soon.');
++      form.reset();
++    } catch {
++      toast.message('Opening your email app instead.');
++      openMail(name, message);
++    } finally {
++      setSending(false);
++    }
++  };
++
+   return (
+     <section
+       id="service"
+       ref={sectionRef}
+       data-inview={activeSection === 'service' ? 'true' : undefined}
+       aria-labelledby="connect-heading"
+-      className="py-20 sm:py-32 opacity-0 translate-y-8 transform-gpu transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] data-[inview=true]:opacity-100 data-[inview=true]:translate-y-0 scroll-mt-20"
++      className="scroll-mt-20 border-t border-border py-12 sm:py-16"
+     >
+-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-16">
+-        <div className="magnet-card rounded-3xl border-double-animated border-border p-6 hover-lift hover:scale-105 hover:shadow-2xl transition-all duration-500">
+-          <div className="space-y-6 sm:space-y-8">
+-            <h2 id="connect-heading" className="text-3xl sm:text-4xl font-bold uppercase">
+-              Let's Connect
+-            </h2>
+-            <div className="space-y-6">
+-              <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
+-                Partner with me on product builds, creative strategy, and technical leadership.
+-                Let&apos;s craft thoughtful experiences that resonate.
+-              </p>
+-              <div className="space-y-4">
+-                <Link
+-                  href="mailto:uddhavbhople5@gmail.com"
+-                  className="group flex items-center gap-3 text-foreground hover:text-muted-foreground transition-colors duration-300"
+-                >
+-                  <span className="text-base sm:text-lg font-mono">
+-                    uddhavbhople5@gmail.com
+-                  </span>
+-                  <svg
+-                    className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300"
+-                    fill="none"
+-                    stroke="currentColor"
+-                    viewBox="0 0 24 24"
+-                  >
+-                    <path
+-                      strokeLinecap="round"
+-                      strokeLinejoin="round"
+-                      strokeWidth={2}
+-                      d="M17 8l4 4m0 0l-4 4m4-4H3"
+-                    />
+-                  </svg>
+-                </Link>
+-              </div>
+-            </div>
+-          </div>
+-        </div>
++      <p className="mb-3 font-mono text-xs uppercase tracking-wider text-muted-foreground"><span className="mr-3 text-primary">05</span>Contact</p>
++      <h2 id="connect-heading" className="font-display text-4xl leading-tight sm:text-5xl">Let&apos;s Connect</h2>
++      <p className="mt-3 max-w-lg text-muted-foreground">Open to internships, collaborations and product builds. Pick a topic and tell me what you are working on.</p>
+ 
+-        <div className="space-y-6 sm:space-y-8">
+-          <div className="border-dotted-thick rounded-3xl border-border p-4">
+-            <div className="text-sm text-muted-foreground font-mono uppercase">
+-              Elsewhere
+-            </div>
++      <div className="mt-8 grid gap-10 md:grid-cols-[1.2fr_1fr]">
++        <form onSubmit={onSubmit} className="flex flex-col gap-4">
++          <div role="group" aria-label="Topic" className="flex flex-wrap gap-2">
++            {TOPICS.map((t) => (
++              <button
++                key={t}
++                type="button"
++                aria-pressed={topic === t}
++                onClick={() => setTopic(t)}
++                className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${topic === t ? 'border-foreground bg-foreground text-background' : 'border-border hover:border-primary'}`}
++              >
++                {t}
++              </button>
++            ))}
+           </div>
++          <label className="flex flex-col gap-1.5"><span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Your name</span><input name="name" required maxLength={80} autoComplete="name" className={field} /></label>
++          <label className="flex flex-col gap-1.5"><span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Your email</span><input name="email" type="email" required maxLength={120} autoComplete="email" className={field} /></label>
++          <label className="flex flex-col gap-1.5"><span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Message</span><textarea name="message" required minLength={5} maxLength={2000} rows={5} placeholder="What are you working on?" className={`${field} resize-y`} /></label>
++          <input name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
++          <button type="submit" disabled={sending} className="w-fit rounded-full bg-foreground px-6 py-3 text-sm text-background transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-60">
++            {sending ? 'Sending…' : 'Send message →'}
++          </button>
++        </form>
+ 
+-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+-            {CONNECT_LINKS.map((social, index) => (
++        <div className="flex flex-col gap-4">
++          <div className="rounded-md border border-border p-5">
++            <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground"><span className="mr-2 inline-block h-2 w-2 rounded-full bg-emerald-500" />Open to opportunities</p>
++            <Link href={`mailto:${EMAIL}`} className="mt-3 block break-all text-lg hover:text-primary">{EMAIL}</Link>
++            <button
++              type="button"
++              onClick={() => navigator.clipboard?.writeText(EMAIL).then(() => toast.success('Email copied')).catch(() => undefined)}
++              className="mt-2 font-mono text-xs uppercase tracking-wider text-primary"
++            >
++              Copy email
++            </button>
++          </div>
++          <div className="rounded-md border border-border px-5 py-2">
++            {CONNECT_LINKS.map((social) => (
+               <Link
+                 key={social.name}
+                 href={generateConnectUrl(social.urlTemplate, social.handle)}
+-                className={`group magnet-card rounded-3xl ${index % 2 === 0
+-                  ? 'border-pulse-animated'
+-                  : 'border-wave-animated'
+-                  } border-border p-4 hover-lift hover:bg-muted transition-all duration-300`}
++                target="_blank"
++                rel="noreferrer"
++                className="flex justify-between border-b border-border py-3 font-mono text-xs uppercase tracking-wider last:border-0 hover:text-primary"
+               >
+-                <div className="space-y-2">
+-                  <div className="text-foreground group-hover:text-muted-foreground transition-colors duration-300 font-bold">
+-                    {social.name}
+-                  </div>
+-                  <div className="text-sm text-muted-foreground font-mono">
+-                    {social.handle}
+-                  </div>
+-                </div>
++                <span>{social.name}</span><span>↗</span>
+               </Link>
+             ))}
+           </div>
+diff --git a/src/components/home/RecruiterHome.tsx b/src/components/home/RecruiterHome.tsx
+index 171fbf1..5c0ee27 100644
+--- a/src/components/home/RecruiterHome.tsx
++++ b/src/components/home/RecruiterHome.tsx
+@@ -1,27 +1,147 @@
+ 'use client';
+ 
++import type { ReactNode } from 'react';
+ import Image from 'next/image';
+ import Link from 'next/link';
+ import { motion, useReducedMotion } from 'framer-motion';
+-import { ArrowUpRight, Circle, ExternalLink, FileText } from 'lucide-react';
++import { ArrowUpRight } from 'lucide-react';
+ import { PROJECT_DATA } from '@/features/projects/infrastructure/projectData';
++import { EXPERIENCES } from '@/lib/constants/experiences';
++
++function Row({ id, index, label, children }: { id: string; index: string; label: string; children: ReactNode }) {
++  return (
++    <section id={id} className="grid scroll-mt-20 gap-3 border-t border-border py-12 sm:py-16 md:grid-cols-[180px_1fr] md:gap-6">
++      <p className="pt-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
++        <span className="mb-1 block text-primary">{index}</span>
++        {label}
++      </p>
++      <div>{children}</div>
++    </section>
++  );
++}
++
++function Chips({ items }: { items: string[] }) {
++  if (!items.length) return null;
++  return (
++    <div className="mt-4 flex flex-wrap gap-2">
++      {items.map((item) => (
++        <span key={item} className="rounded-full border border-border px-3 py-0.5 text-xs text-muted-foreground">{item}</span>
++      ))}
++    </div>
++  );
++}
+ 
+ export function RecruiterHero() {
+   const reduceMotion = useReducedMotion();
+-  return <section id="intro" className="grid min-h-[calc(100vh-6rem)] items-center gap-10 py-28 lg:grid-cols-[1.25fr_.75fr]">
+-    <motion.div initial={reduceMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: 'easeOut' }} className="max-w-3xl">
+-      <div className="mb-7 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.16em] text-[var(--accent-green)]"><Circle className="h-2.5 w-2.5 fill-current" /> Available for the next hard problem</div>
+-      <p className="mb-5 font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">$ whoami</p>
+-      <h1 className="text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-7xl">Uddhav Bhople builds practical AI systems and web products that ship.</h1>
+-      <p className="mt-7 max-w-2xl text-lg leading-8 text-muted-foreground">Computer Engineering student focused on turning ambiguous workflows into useful software — from real-time learning tools to production-ready web experiences.</p>
+-      <div className="mt-9 flex flex-wrap gap-3"><Link href="#selected-work" className="inline-flex min-h-11 items-center gap-2 rounded-md bg-[var(--accent-green)] px-5 py-3 text-sm font-semibold text-[#04110a] transition-transform hover:-translate-y-0.5">View work <ArrowUpRight className="h-4 w-4" /></Link><Link href="/resume" className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border bg-card px-5 py-3 text-sm font-semibold hover:border-[var(--accent-cyan)]"><FileText className="h-4 w-4" /> Resume</Link></div>
+-    </motion.div>
+-    <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-lg border border-border bg-card p-3 shadow-2xl"><div className="absolute left-0 top-0 h-1 w-1/2 bg-[var(--accent-green)]" /><Image src="/portrait.jpg" alt="Uddhav Bhople" width={640} height={640} priority sizes="(min-width: 1024px) 28rem, 80vw" className="aspect-square w-full object-cover grayscale transition duration-500 hover:grayscale-0" /><div className="mt-3 flex justify-between font-mono text-[11px] uppercase tracking-wider text-muted-foreground"><span>Pune, IN</span><span>UTC +05:30</span></div></div>
+-  </section>;
++  return (
++    <section id="intro" className="pb-16 pt-32 sm:pb-24 sm:pt-40">
++      <motion.div
++        initial={reduceMotion ? false : { opacity: 0, y: 16 }}
++        animate={{ opacity: 1, y: 0 }}
++        transition={{ duration: 0.4, ease: 'easeOut' }}
++      >
++        <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Pune, India · Available for the next hard problem</p>
++        <h1 className="mt-7 font-display text-[clamp(2.75rem,8.5vw,6.5rem)] leading-[0.98] tracking-[-0.02em]">
++          I build AI agents that <em className="text-primary">do the work,</em> not just answer.
++        </h1>
++        <p className="mt-9 max-w-xl text-lg leading-8">
++          Computer Engineering student building agentic systems and realtime products: software that listens, reasons, uses tools and gets a real task finished.
++        </p>
++        <div className="mt-8 flex flex-wrap gap-3">
++          <Link href="#projects" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-foreground bg-foreground px-5 text-sm text-background transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground">View work <ArrowUpRight className="h-4 w-4" /></Link>
++          <Link href="/resume" className="inline-flex min-h-11 items-center rounded-full border border-foreground px-5 text-sm transition-colors hover:border-primary hover:text-primary">Resume</Link>
++          <Link href="#service" className="inline-flex min-h-11 items-center rounded-full border border-foreground px-5 text-sm transition-colors hover:border-primary hover:text-primary">Get in touch</Link>
++        </div>
++      </motion.div>
++    </section>
++  );
+ }
+ 
+-export function ProofStrip() { return <section aria-label="Career proof" className="border-y border-border py-5"><p className="mb-4 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Selected affiliations</p><div className="grid grid-cols-2 gap-4 sm:grid-cols-4">{['D. Y. Patil College of Engineering', 'Microsoft Learn Student Ambassador', 'Google Student Ambassador', 'NSDC / EduSkills'].map((name) => <div key={name} className="border-l border-border pl-3 text-sm font-medium leading-5">{name}</div>)}</div></section>; }
++export function AboutSection() {
++  const facts = [['8.64', 'CGPA'], ['117', 'Azure badges'], ['2', 'AI/ML internships']];
++  return (
++    <Row id="about" index="01" label="About">
++      <h2 className="font-display text-4xl leading-tight">Hi, I&apos;m Uddhav.</h2>
++      <p className="mt-5 max-w-2xl text-lg leading-8">
++        I&apos;m a B.Tech Computer Engineering student in Pune who got hooked on AI the moment a model did something I didn&apos;t expect. Since then I&apos;ve been building: realtime classroom tools, learning platforms and small ML projects, and writing about what breaks along the way.
++      </p>
++      <p className="mt-4 max-w-2xl text-lg leading-8">
++        My goal is to build AI agents that are reliable enough to trust with real work, and to grow into a team that ships them at scale.
++      </p>
++      <dl className="mt-8 grid max-w-xl grid-cols-3 gap-4">
++        {facts.map(([value, label]) => (
++          <div key={label}>
++            <dd className="font-display text-4xl text-primary">{value}</dd>
++            <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">{label}</dt>
++          </div>
++        ))}
++      </dl>
++    </Row>
++  );
++}
+ 
+-export function SelectedWork() { const projects = [PROJECT_DATA[0], PROJECT_DATA[3], PROJECT_DATA[4]]; return <section id="selected-work" className="py-24"><div className="mb-10 flex flex-wrap items-end justify-between gap-4"><div><p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-cyan)]">$ ls projects/</p><h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Selected work, with context.</h2></div><Link href="/project" className="text-sm font-medium text-muted-foreground hover:text-foreground">All projects →</Link></div><div className="grid gap-5 lg:grid-cols-3">{projects.map((project) => <article key={project.id} className="group overflow-hidden rounded-lg border border-border bg-card"><div className="relative aspect-[16/10] overflow-hidden"><Image src={project.image} alt={`${project.title} interface`} fill sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover transition duration-300 group-hover:scale-[1.03]" /><div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#070909] p-4 pt-12"><span className="font-mono text-[10px] uppercase tracking-widest text-[var(--accent-green)]">{project.categories[0]}</span></div></div><div className="p-5"><div className="flex items-start justify-between gap-4"><h3 className="text-lg font-semibold">{project.title}</h3>{project.link ? <a href={project.link} target="_blank" rel="noreferrer" aria-label={`Open ${project.title}`} className="text-[var(--accent-cyan)]"><ExternalLink className="h-4 w-4" /></a> : null}</div><p className="mt-3 text-sm leading-6 text-muted-foreground">{project.summary}</p><div className="mt-5 flex flex-wrap gap-2">{project.languages.slice(0, 4).map((item) => <span key={item} className="rounded border border-border px-2 py-1 font-mono text-[10px] text-muted-foreground">{item}</span>)}</div></div></article>)}</div></section>; }
++export function ExperienceSection() {
++  return (
++    <Row id="experience" index="02" label="Experience">
++      <ol className="border-t border-border">
++        {EXPERIENCES.slice(0, 4).map((item) => (
++          <li key={`${item.company}-${item.year}`} className="border-b border-border py-6">
++            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
++              <h3 className="font-display text-2xl leading-tight">{item.role}</h3>
++              <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">{item.year}</span>
++            </div>
++            <p className="mt-1 font-mono text-xs uppercase tracking-wider text-primary">{item.company}</p>
++            <p className="mt-3 max-w-2xl text-[15px] leading-7 text-muted-foreground">{item.description}</p>
++            <Chips items={item.tech} />
++          </li>
++        ))}
++      </ol>
++      <p className="mt-6 font-mono text-xs uppercase tracking-wider"><Link href="/experience" className="hover:text-primary">Full experience →</Link></p>
++    </Row>
++  );
++}
++
++export function SelectedWork() {
++  const projects = [PROJECT_DATA[0], PROJECT_DATA[3], PROJECT_DATA[4]].filter(Boolean);
++  return (
++    <Row id="projects" index="03" label="Tools & Projects">
++      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
++        {projects.map((project, i) => {
++          const body = (
++            <>
++              <div className="relative aspect-video overflow-hidden border-b border-border bg-background">
++                <Image src={project.image} alt={`${project.title} screenshot`} fill sizes="(min-width: 1024px) 30vw, 100vw" className="object-cover object-top" />
++              </div>
++              <div className="flex flex-1 flex-col p-6">
++                <div className="mb-3 flex justify-between font-mono text-xs uppercase tracking-wider text-muted-foreground">
++                  <span>0{i + 1}</span>
++                  <span className="group-hover:text-primary">{project.link ? 'View ↗' : ''}</span>
++                </div>
++                <h3 className="font-display text-2xl leading-tight">{project.title}</h3>
++                <p className="mt-2 flex-1 text-[15px] leading-7 text-muted-foreground">{project.summary}</p>
++                <Chips items={project.languages.slice(0, 5)} />
++              </div>
++            </>
++          );
++          const cls = 'group flex flex-col overflow-hidden rounded-md border border-border bg-card transition duration-200 hover:-translate-y-0.5 hover:border-primary';
++          return project.link
++            ? <a key={project.id} href={project.link} target="_blank" rel="noreferrer" className={cls}>{body}</a>
++            : <article key={project.id} className={cls}>{body}</article>;
++        })}
++      </div>
++      <p className="mt-6 font-mono text-xs uppercase tracking-wider"><Link href="/project" className="hover:text-primary">All projects →</Link></p>
++    </Row>
++  );
++}
+ 
+-export function NowFocus() { return <section className="grid gap-6 border-y border-border py-16 md:grid-cols-[.7fr_1.3fr]"><div><p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-green)]">now / focus</p><h2 className="mt-3 text-3xl font-semibold tracking-tight">What I&apos;m building toward.</h2></div><div className="space-y-5"><p className="text-lg leading-8 text-muted-foreground">Exploring real-time AI interfaces and dependable product infrastructure — with special attention to how people actually learn, decide, and get work done.</p><div className="flex flex-wrap gap-3 font-mono text-xs"><span className="rounded border border-border px-3 py-2">Realtime systems</span><span className="rounded border border-border px-3 py-2">Applied ML</span><span className="rounded border border-border px-3 py-2">Next.js architecture</span></div></div></section>; }
++export function NowFocus() {
++  return (
++    <Row id="now" index="04" label="Now / Focus">
++      <div className="rounded-md border border-border border-l-[3px] border-l-primary bg-card p-8">
++        <h2 className="font-display text-4xl leading-tight">What I&apos;m building toward.</h2>
++        <p className="mt-4 max-w-2xl text-lg leading-8">AI agents that take real actions, realtime AI interfaces, and the dependable infrastructure underneath them.</p>
++        <Chips items={['AI agents', 'Realtime systems', 'Applied ML', 'Next.js architecture']} />
++      </div>
++    </Row>
++  );
++}
+diff --git a/src/components/navigation/HeaderNavigation.tsx b/src/components/navigation/HeaderNavigation.tsx
+index 84e3dff..364cc54 100644
+--- a/src/components/navigation/HeaderNavigation.tsx
++++ b/src/components/navigation/HeaderNavigation.tsx
+@@ -4,6 +4,7 @@ import Link from 'next/link';
+ import { usePathname } from 'next/navigation';
+ import { useEffect, useState } from 'react';
+ import { Menu, X } from 'lucide-react';
++import { ThemeToggle } from '@/components/ui/ThemeToggle';
+ import { CommandPalette } from '@/features/tools/components/CommandPalette';
+ 
+ import { cn } from '@/lib/utils';
+@@ -14,46 +15,10 @@ interface NavItem {
+ }
+ 
+ const NAV_ITEMS: NavItem[] = [
+-  {
+-    label: 'Experience',
+-    href: '/experience',
+-    isActive: (pathname) => pathname === '/experience',
+-  },
+-  // {
+-  //   label: 'Honors',
+-  //   href: '/honors-awards',
+-  //   isActive: (pathname) => pathname === '/honors-awards',
+-  // },
+-  {
+-    label: 'Tools & Projects',
+-    href: '/project',
+-    isActive: (pathname) => pathname === '/project',
+-  },
+-  /*{
+-    label: 'Certificate',
+-    href: '/certificates',
+-    isActive: (pathname) => pathname.startsWith('/certificates'),
+-  },*/
+-  {
+-    label: 'Blog',
+-    href: '/blog',
+-    isActive: (pathname) => pathname === '/blog' || pathname.startsWith('/blog/'),
+-  },
+-  {
+-    label: 'Contact',
+-    href: 'mailto:uddhavbhople5@gmail.com',
+-    isActive: () => false,
+-  },
+-  // {
+-  //   label: 'Uses',
+-  //   href: '/uses',
+-  //   isActive: (pathname) => pathname === '/uses',
+-  // },
+-  // {
+-  //   label: 'Resume',
+-  //   href: '/resume',
+-  //   isActive: (pathname) => pathname === '/resume',
+-  // },
++  { label: 'About', href: '/#about', isActive: () => false },
++  { label: 'Experience', href: '/#experience', isActive: (pathname) => pathname === '/experience' },
++  { label: 'Projects', href: '/#projects', isActive: (pathname) => pathname === '/project' },
++  { label: 'Contact', href: '/#service', isActive: () => false },
+ ];
+ 
+ export function HeaderNavigation() {
+@@ -81,16 +46,16 @@ export function HeaderNavigation() {
+   );
+ 
+   return (
+-    <header className="fixed inset-x-0 top-0 z-50 flex justify-center print:hidden">
++    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur print:hidden">
+       <div
+         className={cn(
+-          'relative z-50 mt-4 flex w-[95%] max-w-5xl items-center justify-between gap-6 rounded-full border border-border/60 bg-background/80 px-6 py-3 backdrop-blur shadow-lg transition-all duration-500',
++          'relative z-50 mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-6 px-5 sm:px-8',
+           visibilityClasses
+         )}
+       >
+         <Link
+           href="/"
+-          className="text-xs font-semibold uppercase tracking-[0.2em] md:tracking-[0.5em] text-muted-foreground transition-colors hover:text-foreground z-50"
++          className="font-display text-2xl leading-none text-foreground transition-colors hover:text-primary z-50"
+           onClick={() => setIsMobileMenuOpen(false)}
+         >
+           Uddhav Bhople
+@@ -110,8 +75,8 @@ export function HeaderNavigation() {
+                 target={isExternal ? '_blank' : undefined}
+                 rel={isExternal ? 'noopener noreferrer' : undefined}
+                 className={cn(
+-                  'text-xs font-semibold uppercase tracking-[0.2em] lg:tracking-[0.4em] transition-all duration-300',
+-                  'hover:text-foreground hover:scale-110',
++                  'font-mono text-xs uppercase tracking-wider transition-colors duration-200',
++                  'hover:text-primary',
+                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                   active ? 'text-foreground' : 'text-muted-foreground'
+                 )}
+@@ -121,7 +86,7 @@ export function HeaderNavigation() {
+             );
+           })}
+         </nav>
+-        <CommandPalette />
++        <div className="flex items-center gap-3"><CommandPalette /><ThemeToggle /></div>
+ 
+         {/* Mobile Menu Toggle */}
+         <button
+@@ -162,9 +127,9 @@ export function HeaderNavigation() {
+                 target={isExternal ? '_blank' : undefined}
+                 rel={isExternal ? 'noopener noreferrer' : undefined}
+                 className={cn(
+-                  'text-lg font-semibold uppercase tracking-[0.4em] transition-all duration-300 transform',
++                  'font-display text-4xl transition-all duration-300 transform',
+                   isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0',
+-                  'hover:text-primary hover:scale-110',
++                  'hover:text-primary',
+                   active ? 'text-foreground' : 'text-muted-foreground'
+                 )}
+                 style={{ transitionDelay: `${index * 100}ms` }}
+diff --git a/src/components/ui/ThemeToggle.tsx b/src/components/ui/ThemeToggle.tsx
+new file mode 100644
+index 0000000..bc06552
+--- /dev/null
++++ b/src/components/ui/ThemeToggle.tsx
+@@ -0,0 +1,17 @@
++'use client';
++
++import { useTheme } from '@/hooks/useTheme';
++
++export function ThemeToggle() {
++  const { isDark, toggleTheme, mounted } = useTheme();
++  return (
++    <button
++      type="button"
++      onClick={toggleTheme}
++      aria-label={mounted ? `Switch to ${isDark ? 'light' : 'dark'} theme` : 'Switch theme'}
++      className="min-h-9 whitespace-nowrap rounded-full border border-border px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors hover:border-primary hover:text-primary"
++    >
++      {mounted ? (isDark ? '☀ Light' : '☾ Dark') : '◐ Theme'}
++    </button>
++  );
++}
+diff --git a/src/components/ui/background.tsx b/src/components/ui/background.tsx
+index 252287e..cda4b19 100644
+--- a/src/components/ui/background.tsx
++++ b/src/components/ui/background.tsx
+@@ -1,11 +1,5 @@
+ 'use client';
+ 
+ export function Background() {
+-  return (
+-    <div className="fixed inset-0 -z-50 overflow-hidden bg-background">
+-      <div className="terminal-grid absolute inset-0 opacity-40" />
+-      <div className="absolute -top-48 right-[-12rem] h-[32rem] w-[32rem] rounded-full bg-[var(--accent-cyan)]/5 blur-3xl" />
+-      <div className="absolute bottom-[-16rem] left-[-12rem] h-[30rem] w-[30rem] rounded-full bg-[var(--accent-green)]/5 blur-3xl" />
+-    </div>
+-  );
++  return <div className="fixed inset-0 -z-50 bg-background" aria-hidden="true" />;
+ }
+diff --git a/src/lib/schema/article.ts b/src/lib/schema/article.ts
+index fc76ba4..f2b1e69 100644
+--- a/src/lib/schema/article.ts
++++ b/src/lib/schema/article.ts
+@@ -49,7 +49,7 @@ export function getArticleSchema({
+   slug,
+   author = 'Uddhav Bhople',
+ }: ArticleSchemaProps): ArticleSchema {
+-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://uddhavbhople.dev';
++  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.uddhavbhople.in';
+   const url = `${baseUrl}/blog/${slug}`;
+ 
+   return {
+diff --git a/src/lib/schema/breadcrumb.ts b/src/lib/schema/breadcrumb.ts
+index c4df9ac..8b922b8 100644
+--- a/src/lib/schema/breadcrumb.ts
++++ b/src/lib/schema/breadcrumb.ts
+@@ -24,7 +24,7 @@ export interface BreadcrumbItemProps {
+ export function getBreadcrumbSchema(
+   items: BreadcrumbItemProps[]
+ ): BreadcrumbListSchema {
+-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://uddhavbhople.dev';
++  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.uddhavbhople.in';
+ 
+   return {
+     '@context': 'https://schema.org',
+diff --git a/src/lib/schema/person.ts b/src/lib/schema/person.ts
+index 63114d9..317cfa2 100644
+--- a/src/lib/schema/person.ts
++++ b/src/lib/schema/person.ts
+@@ -25,7 +25,7 @@ export interface PersonSchema {
+ }
+ 
+ export function getPersonSchema(): PersonSchema {
+-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://uddhavbhople.dev';
++  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.uddhavbhople.in';
+ 
+   return {
+     '@context': 'https://schema.org',
+@@ -37,7 +37,7 @@ export function getPersonSchema(): PersonSchema {
+     sameAs: [
+       'https://github.com/uddhav05-cyber',
+       'https://www.linkedin.com/in/uddhav-bhople/',
+-      'https://uddhavbhople.dev',
++      'https://www.uddhavbhople.in',
+     ],
+     image: `${baseUrl}/portrait.jpg`,
+     description:
