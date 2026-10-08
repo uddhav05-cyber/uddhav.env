@@ -18,6 +18,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'About', href: '/#about', isActive: () => false },
   { label: 'Experience', href: '/#experience', isActive: (pathname) => pathname === '/experience' },
   { label: 'Projects', href: '/#projects', isActive: (pathname) => pathname === '/project' },
+  { label: 'Blog', href: '/blog', isActive: (pathname) => pathname.startsWith('/blog') },
   { label: 'Contact', href: '/#service', isActive: () => false },
 ];
 
@@ -46,7 +47,7 @@ export function HeaderNavigation() {
   );
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur print:hidden">
+    <header className="fixed inset-x-0 top-0 z-[70] border-b border-border bg-background pt-[env(safe-area-inset-top)] print:hidden">
       <div
         className={cn(
           'relative z-50 mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-6 px-5 sm:px-8',
@@ -62,7 +63,7 @@ export function HeaderNavigation() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-6">
+        <nav aria-label="Main navigation" className="hidden md:flex items-center gap-6">
           {NAV_ITEMS.map((item) => {
             const active = item.isActive(pathname);
             const isExternal = item.href.startsWith('http');
@@ -90,7 +91,7 @@ export function HeaderNavigation() {
 
         {/* Mobile Menu Toggle */}
         <button
-          className="lg:hidden relative z-50 p-2 -mr-2 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+          className="relative z-50 p-2 -mr-2 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded md:hidden"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={isMobileMenuOpen}
@@ -108,14 +109,19 @@ export function HeaderNavigation() {
       <div
         id="mobile-menu"
         className={cn(
-          'fixed inset-0 z-40 flex flex-col items-center justify-center bg-background/95 backdrop-blur-md transition-all duration-500 lg:hidden',
+          'fixed inset-0 z-50 flex min-h-full w-full items-stretch justify-end overflow-y-auto bg-black/40 transition-all duration-500 md:hidden',
           isMobileMenuOpen
             ? 'opacity-100 pointer-events-auto'
             : 'opacity-0 pointer-events-none'
         )}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) {
+            setIsMobileMenuOpen(false);
+          }
+        }}
         aria-hidden={!isMobileMenuOpen}
       >
-        <nav aria-label="Mobile navigation" className="flex flex-col items-center gap-8 p-4">
+        <nav aria-label="Mobile navigation" className="ml-auto flex min-h-full w-full max-w-md flex-col items-center justify-center gap-8 overflow-y-auto bg-background px-6 pb-[env(safe-area-inset-bottom)] pt-20">
           {NAV_ITEMS.map((item, index) => {
             const active = item.isActive(pathname);
             const isExternal = item.href.startsWith('http');

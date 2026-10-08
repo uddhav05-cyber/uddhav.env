@@ -6,6 +6,7 @@ import { FaArrowRight } from 'react-icons/fa';
 import { CalendarDays, Clock, ArrowUpRight } from 'lucide-react';
 import { getLatestBlogPosts } from '@/app/actions/blog';
 import type { BlogPostMetadata } from '@/features/blog/module/types';
+import { linkedInPosts } from '@/data/linkedInPosts';
 
 interface LatestBlogProps {
     sectionRef?: (el: HTMLElement | null) => void;
@@ -14,6 +15,7 @@ interface LatestBlogProps {
 export const LatestBlog = memo(function LatestBlog({ sectionRef }: LatestBlogProps) {
     const [posts, setPosts] = useState<BlogPostMetadata[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<'articles' | 'linkedin'>('articles');
 
     useEffect(() => {
         getLatestBlogPosts(3)
@@ -53,8 +55,67 @@ export const LatestBlog = memo(function LatestBlog({ sectionRef }: LatestBlogPro
                     </Link>
                 </div>
 
+                <div className="flex flex-wrap gap-2" role="tablist" aria-label="Blog content type">
+                    <button
+                        type="button"
+                        role="tab"
+                        aria-selected={activeTab === 'articles'}
+                        onClick={() => setActiveTab('articles')}
+                        className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                            activeTab === 'articles'
+                                ? 'border-foreground bg-foreground text-background'
+                                : 'border-border text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                        Articles
+                    </button>
+                    <button
+                        type="button"
+                        role="tab"
+                        aria-selected={activeTab === 'linkedin'}
+                        onClick={() => setActiveTab('linkedin')}
+                        className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                            activeTab === 'linkedin'
+                                ? 'border-foreground bg-foreground text-background'
+                                : 'border-border text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                        LinkedIn Posts
+                    </button>
+                </div>
+
                 {/* Posts Grid */}
-                {isLoading ? (
+                {activeTab === 'linkedin' ? (
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" role="tabpanel">
+                        {linkedInPosts.map((post) => (
+                            <article
+                                key={post.id}
+                                className="group flex flex-col rounded-2xl border border-border/50 bg-background/50 p-6 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-border/80 hover:shadow-2xl"
+                            >
+                                <div className="flex items-start justify-between gap-4">
+                                    <span className="rounded-md bg-blue-500/10 px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-blue-500">
+                                        {post.topicTag}
+                                    </span>
+                                    <time className="shrink-0 text-xs font-mono text-muted-foreground">{post.date}</time>
+                                </div>
+                                <h4 className="mt-5 text-lg font-bold tracking-tight group-hover:text-blue-500">
+                                    {post.title}
+                                </h4>
+                                <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
+                                    {post.snippet}
+                                </p>
+                                <a
+                                    href={post.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:text-blue-500"
+                                >
+                                    Read on LinkedIn ↗
+                                </a>
+                            </article>
+                        ))}
+                    </div>
+                ) : isLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {[...Array(3)].map((_, i) => (
                             <div

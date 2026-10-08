@@ -8,6 +8,7 @@
   /* Pure white */
   --foreground: oklch(0 0 0);
   /* Pure black */
+  --color-text-heading: #111827;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0 0 0);
   --popover: oklch(1 0 0);
@@ -47,6 +48,7 @@
   /* Pure black */
   --foreground: oklch(1 0 0);
   /* Pure white */
+  --color-text-heading: #f9fafb;
   --card: oklch(0 0 0);
   --card-foreground: oklch(1 0 0);
   --popover: oklch(0 0 0);
@@ -127,6 +129,16 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .heading {
+    color: var(--color-text-heading);
   }
 
   /* Screen reader only - hide visually but keep for screen readers */
@@ -636,6 +648,23 @@
   --font-display: var(--font-instrument), Georgia, serif;
 }
 
+@keyframes marquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+  will-change: transform;
+}
+
 body { font-family: var(--font-inter), system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
 
 .terminal-grid {
@@ -650,4 +679,9 @@ body { font-family: var(--font-inter), system-ui, sans-serif; -webkit-font-smoot
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+
+  .animate-marquee {
+    animation-play-state: paused;
+    will-change: auto;
+  }
 }

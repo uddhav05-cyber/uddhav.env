@@ -80,7 +80,7 @@ export const CONNECT_LINKS: ConnectLink[] = [
   },*/
   {
     name: 'Dev.to',
-    handle: 'uddhav05-cyber',
+    handle: 'uddhav_bhople',
     urlTemplate: 'https://dev.to/{handle}',
     handleKey: 'all',
   },

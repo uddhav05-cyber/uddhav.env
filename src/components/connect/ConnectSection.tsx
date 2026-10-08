@@ -104,7 +104,7 @@ export const ConnectSection = memo(function ConnectSection({ activeSection = '',
                 key={social.name}
                 href={generateConnectUrl(social.urlTemplate, social.handle)}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="flex justify-between border-b border-border py-3 font-mono text-xs uppercase tracking-wider last:border-0 hover:text-primary"
               >
                 <span>{social.name}</span><span>↗</span>
