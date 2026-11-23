@@ -72,9 +72,16 @@ export function TypewriterHeadline() {
 
   return (
     <h1
-      aria-live="polite"
-      className="mt-7 font-display text-[clamp(2.625rem,8vw,6.375rem)] leading-[0.98] tracking-[-0.02em]"
+      className="mt-7 grid min-w-0 font-display text-[clamp(2.5rem,8vw,6.375rem)] leading-[1.05] tracking-[-0.02em] [overflow-wrap:anywhere] sm:leading-[0.98]"
     >
+      <span className="sr-only">{HEADLINES[0].prefix}{HEADLINES[0].highlight}</span>
+      {/* Reserve the tallest headline at every viewport width to avoid layout jumps. */}
+      {HEADLINES.map((item) => (
+        <span key={item.highlight} aria-hidden="true" className="invisible col-start-1 row-start-1 min-w-0">
+          {item.prefix}<em>{item.highlight}</em><span className="ml-1 inline-block">|</span>
+        </span>
+      ))}
+      <span aria-hidden="true" className="col-start-1 row-start-1 min-w-0">
       {visibleText.length > highlightStart ? (
         <>
           {visibleText.slice(0, highlightStart)}
@@ -91,6 +98,7 @@ export function TypewriterHeadline() {
           |
         </span>
       )}
+      </span>
     </h1>
   );
 }

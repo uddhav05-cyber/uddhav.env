@@ -29,16 +29,16 @@ export const LatestBlog = memo(function LatestBlog({ sectionRef }: LatestBlogPro
             ref={sectionRef}
             id="blog"
             aria-label="Latest blog posts"
-            className="py-20 sm:py-32 relative opacity-0 translate-y-8 transform-gpu transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] data-[inview=true]:opacity-100 data-[inview=true]:translate-y-0 scroll-mt-20"
+            className="relative scroll-mt-20 py-12 sm:py-16"
         >
             {/* Decorative blob */}
-            <div className="absolute top-1/2 -right-20 w-80 h-80 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute top-1/2 right-0 h-80 w-full max-w-80 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
 
             <div className="space-y-12 relative z-10">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 px-4">
                     <div className="space-y-2">
-                        <h2 className="text-sm font-mono text-blue-500 tracking-[0.2em] uppercase">
+                        <h2 className="text-sm font-mono text-primary tracking-[0.2em] uppercase">
                             From the Blog
                         </h2>
                         <h3 className="text-3xl sm:text-5xl font-bold uppercase tracking-tighter">
@@ -61,7 +61,7 @@ export const LatestBlog = memo(function LatestBlog({ sectionRef }: LatestBlogPro
                         role="tab"
                         aria-selected={activeTab === 'articles'}
                         onClick={() => setActiveTab('articles')}
-                        className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                        className={`min-h-11 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                             activeTab === 'articles'
                                 ? 'border-foreground bg-foreground text-background'
                                 : 'border-border text-muted-foreground hover:text-foreground'
@@ -74,7 +74,7 @@ export const LatestBlog = memo(function LatestBlog({ sectionRef }: LatestBlogPro
                         role="tab"
                         aria-selected={activeTab === 'linkedin'}
                         onClick={() => setActiveTab('linkedin')}
-                        className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                        className={`min-h-11 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                             activeTab === 'linkedin'
                                 ? 'border-foreground bg-foreground text-background'
                                 : 'border-border text-muted-foreground hover:text-foreground'
@@ -92,13 +92,13 @@ export const LatestBlog = memo(function LatestBlog({ sectionRef }: LatestBlogPro
                                 key={post.id}
                                 className="group flex flex-col rounded-2xl border border-border/50 bg-background/50 p-6 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-border/80 hover:shadow-2xl"
                             >
-                                <div className="flex items-start justify-between gap-4">
-                                    <span className="rounded-md bg-blue-500/10 px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-blue-500">
+                                <div className="flex flex-wrap items-start justify-between gap-4">
+                                    <span className="rounded-md bg-primary/10 px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-primary">
                                         {post.topicTag}
                                     </span>
                                     <time className="shrink-0 text-xs font-mono text-muted-foreground">{post.date}</time>
                                 </div>
-                                <h4 className="mt-5 text-lg font-bold tracking-tight group-hover:text-blue-500">
+                                <h4 className="mt-5 text-lg font-bold tracking-tight group-hover:text-primary">
                                     {post.title}
                                 </h4>
                                 <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
@@ -108,7 +108,7 @@ export const LatestBlog = memo(function LatestBlog({ sectionRef }: LatestBlogPro
                                     href={post.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:text-blue-500"
+                                    className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:text-primary"
                                 >
                                     Read on LinkedIn ↗
                                 </a>
@@ -116,7 +116,7 @@ export const LatestBlog = memo(function LatestBlog({ sectionRef }: LatestBlogPro
                         ))}
                     </div>
                 ) : isLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {[...Array(3)].map((_, i) => (
                             <div
                                 key={i}
@@ -140,7 +140,7 @@ export const LatestBlog = memo(function LatestBlog({ sectionRef }: LatestBlogPro
                         <p className="text-lg">No posts yet. Stay tuned!</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {posts.map((post, index) => (
                             <Link
                                 key={post.slug}
@@ -154,7 +154,7 @@ export const LatestBlog = memo(function LatestBlog({ sectionRef }: LatestBlogPro
 
                                 <div className="space-y-4">
                                     {/* Meta */}
-                                    <div className="flex items-center gap-4 text-xs font-mono text-muted-foreground">
+                                    <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-muted-foreground">
                                         <div className="flex items-center gap-1.5">
                                             <CalendarDays className="h-3 w-3" aria-hidden="true" />
                                             <time dateTime={post.date}>
@@ -174,7 +174,7 @@ export const LatestBlog = memo(function LatestBlog({ sectionRef }: LatestBlogPro
                                     </div>
 
                                     {/* Title */}
-                                    <h4 className="text-lg font-bold tracking-tight group-hover:text-blue-500 transition-colors duration-300 line-clamp-2 pr-6">
+                                    <h4 className="text-lg font-bold tracking-tight group-hover:text-primary transition-colors duration-300 line-clamp-2 pr-6">
                                         {post.title}
                                     </h4>
 
@@ -198,7 +198,7 @@ export const LatestBlog = memo(function LatestBlog({ sectionRef }: LatestBlogPro
                                     )}
 
                                     {/* Read more indicator */}
-                                    <div className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-muted-foreground group-hover:text-blue-500 transition-colors pt-2">
+                                    <div className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-muted-foreground group-hover:text-primary transition-colors pt-2">
                                         <span>Read</span>
                                         <ArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
                                     </div>

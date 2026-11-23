@@ -1,6 +1,6 @@
 import { ArrowLeft, Download, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
-import { RESUME_PATH, RESUME_VERSION } from './constants';
+import { RESUME_DRIVE_URL, RESUME_PATH, RESUME_VERSION } from './constants';
 
 const resumeUrl = `${RESUME_PATH}?v=${RESUME_VERSION}`;
 
@@ -40,7 +40,19 @@ export default function ResumePage() {
       </div>
 
       <main className="mx-auto max-w-5xl">
-        <h1 className="mb-6 font-display text-4xl leading-tight">Resume</h1>
+        <div className="mb-6 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+          <h1 className="font-display text-4xl leading-tight">Resume</h1>
+          {RESUME_DRIVE_URL && (
+            <a
+              href={RESUME_DRIVE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground print:hidden"
+            >
+              Open latest version in Google Drive
+            </a>
+          )}
+        </div>
         <object
           data={resumeUrl}
           type="application/pdf"

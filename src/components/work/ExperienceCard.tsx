@@ -62,9 +62,11 @@ export function ExperienceCard({
               {job.company}
             </div>
           </div>
-          <p className="text-muted-foreground leading-relaxed max-w-lg">
-            {job.description}
-          </p>
+          {job.description && (
+            <p className="text-muted-foreground leading-relaxed max-w-lg">
+              {job.description}
+            </p>
+          )}
         </div>
 
         {/* TECH */}

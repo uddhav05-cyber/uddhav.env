@@ -11,12 +11,12 @@ import { TypewriterHeadline } from './TypewriterHeadline';
 
 function Row({ id, index, label, children }: { id: string; index: string; label: string; children: ReactNode }) {
   return (
-    <section id={id} className="grid scroll-mt-20 gap-3 border-t border-border py-12 sm:py-16 md:grid-cols-[180px_1fr] md:gap-6">
+    <section id={id} className="grid scroll-mt-20 gap-3 border-t border-border py-12 sm:py-16 md:grid-cols-[180px_minmax(0,1fr)] md:gap-6">
       <p className="pt-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
         <span className="mb-1 block text-primary">{index}</span>
         {label}
       </p>
-      <div>{children}</div>
+      <div className="min-w-0 [overflow-wrap:anywhere]">{children}</div>
     </section>
   );
 }
@@ -35,7 +35,7 @@ function Chips({ items }: { items: string[] }) {
 export function RecruiterHero() {
   const reduceMotion = useReducedMotion();
   return (
-    <section id="intro" className="pb-16 pt-32 sm:pb-24 sm:pt-40">
+    <section id="intro" className="pb-12 pt-24 sm:pb-24 sm:pt-40">
       <motion.div
         initial={reduceMotion ? false : { opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -71,9 +71,9 @@ export function AboutSection() {
       <p className="mt-4 max-w-2xl text-lg leading-8">
         My goal is to build AI agents that are reliable enough to trust with real work, and to grow into a team that ships them at scale.
       </p>
-      <dl className="mt-8 grid max-w-xl grid-cols-3 gap-4">
+      <dl className="mt-8 grid max-w-xl grid-cols-1 gap-4 min-[400px]:grid-cols-3">
         {facts.map(([value, label]) => (
-          <div key={label}>
+          <div key={label} className="flex items-baseline gap-3 min-[400px]:block">
             <dd className="font-display text-4xl text-primary">{value}</dd>
             <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">{label}</dt>
           </div>
@@ -87,14 +87,16 @@ export function ExperienceSection() {
   return (
     <Row id="experience" index="02" label="Experience">
       <ol className="border-t border-border">
-        {EXPERIENCES.slice(0, 4).map((item) => (
+        {EXPERIENCES.slice(0, 5).map((item) => (
           <li key={`${item.company}-${item.year}`} className="border-b border-border py-6">
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               <h3 className="font-display text-2xl leading-tight">{item.role}</h3>
               <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">{item.year}</span>
             </div>
             <p className="mt-1 font-mono text-xs uppercase tracking-wider text-primary">{item.company}</p>
-            <p className="mt-3 max-w-2xl text-[15px] leading-7 text-muted-foreground">{item.description}</p>
+            {item.description && (
+              <p className="mt-3 max-w-2xl text-[15px] leading-7 text-muted-foreground">{item.description}</p>
+            )}
             <Chips items={item.tech} />
           </li>
         ))}
@@ -135,7 +137,7 @@ export function SelectedWork() {
             : <article key={project.id} className={cls}>{body}</article>;
         })}
       </div>
-      <p className="mt-6 font-mono text-xs uppercase tracking-wider"><a href="https://github.com/uddhavbhople" target="_blank" rel="noopener noreferrer" className="hover:text-primary">All projects →</a></p>
+      <p className="mt-6 font-mono text-xs uppercase tracking-wider"><Link href="/project" className="hover:text-primary">All projects →</Link></p>
     </Row>
   );
 }
@@ -143,8 +145,8 @@ export function SelectedWork() {
 export function NowFocus() {
   return (
     <Row id="now" index="04" label="Now / Focus">
-      <div className="rounded-md border border-border border-l-[3px] border-l-primary bg-card p-8">
-        <h2 className="font-display text-4xl leading-tight">What I&apos;m building toward.</h2>
+      <div className="rounded-md border border-border border-l-[3px] border-l-primary bg-card p-5 sm:p-8">
+        <h2 className="font-display text-3xl leading-tight sm:text-4xl">What I&apos;m building toward.</h2>
         <p className="mt-4 max-w-2xl text-lg leading-8">AI agents that take real actions, realtime AI interfaces, and the dependable infrastructure underneath them.</p>
         <Chips items={['AI agents', 'Realtime systems', 'Applied ML', 'Next.js architecture']} />
       </div>

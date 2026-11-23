@@ -6,13 +6,6 @@ import type { ProjectCatalogDto } from '@/features/projects/application/ProjectC
 import { ProjectFilterState } from '@/features/projects/module/state/ProjectFilterState';
 import { ProjectFilterPanel } from '@/features/projects/components/ProjectFilterPanel';
 import { ProjectShowcaseCard } from '@/features/projects/components/ProjectShowcaseCard';
-import {
-  ToolPaletteService,
-  type ToolPaletteDto,
-} from '@/features/tools/application/ToolPaletteService';
-import { StaticToolRepository } from '@/features/tools/infrastructure/StaticToolRepository';
-import { ToolPaletteController } from '@/features/tools/module/controllers/ToolPaletteController';
-import { ToolStackShowcase } from '@/features/tools/components/ToolStackShowcase';
 import { PersonalProjectsShowcase } from '@/features/projects/components/PersonalProjectsShowcase';
 import { ProjectPagination } from '@/features/projects/components/ProjectPagination';
 import {
@@ -28,16 +21,8 @@ export function ProjectExplorer() {
     () => createProjectPreferenceController(),
     []
   );
-  const toolController = useMemo(
-    () =>
-      new ToolPaletteController(
-        new ToolPaletteService(new StaticToolRepository())
-      ),
-    []
-  );
 
   const [catalog, setCatalog] = useState<ProjectCatalogDto | null>(null);
-  const [toolGroups, setToolGroups] = useState<ToolPaletteDto[]>([]);
   const [filterState, setFilterState] = useState<ProjectFilterState>(() =>
     ProjectFilterState.empty()
   );
@@ -51,12 +36,6 @@ export function ProjectExplorer() {
 
   useEffect(() => {
     let isMounted = true;
-
-    void toolController.loadPalette().then((groups) => {
-      if (isMounted) {
-        setToolGroups(groups);
-      }
-    });
 
     setIsReady(false);
     setError(null);
@@ -81,7 +60,7 @@ export function ProjectExplorer() {
     return () => {
       isMounted = false;
     };
-  }, [toolController]);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -280,16 +259,12 @@ export function ProjectExplorer() {
           Project Hypergrid
         </h1>
         <p className="max-w-3xl text-sm sm:text-base text-muted-foreground">
-          Filter by vibe, stack, and mission to discover each build in the
-          matrix. Every project couples thoughtful design with high-signal
-          engineering narratives.
+          Explore my projects, their source code, and the tools used to build them.
         </p>
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
       </header>
 
       <PersonalProjectsShowcase />
-
-      <ToolStackShowcase groups={toolGroups} />
 
       {/* <div ref={projectGridRef} className="grid gap-8 lg:grid-cols-[300px_minmax(0,1fr)]">
         <ProjectFilterPanel

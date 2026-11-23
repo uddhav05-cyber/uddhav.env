@@ -8,6 +8,13 @@ export interface Experience {
 
 export const EXPERIENCES: Experience[] = [
   {
+    year: 'Nov 2026 – Present',
+    role: 'AI Engineer Intern',
+    company: 'Doastra Technologies',
+    description: '',
+    tech: [],
+  },
+  {
     year: 'Jul 2026 – Aug 2026',
     role: 'Backend AI Engineering Intern (Virtual)',
     company: 'FlyRank AI',

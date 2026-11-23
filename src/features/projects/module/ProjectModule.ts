@@ -21,7 +21,7 @@ export interface ProjectControllers {
 }
 
 const DEFAULT_PROJECT_PROFILE = {
-  githubUser: 'trahoangdev',
+  githubUser: 'uddhav05-cyber',
 };
 
 export function createProjectControllers(): ProjectControllers {

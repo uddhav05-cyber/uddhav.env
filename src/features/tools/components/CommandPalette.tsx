@@ -49,11 +49,14 @@ export function CommandPalette() {
     { label: 'Experience', category: 'Navigate', action: () => navigate('/experience') },
     { label: 'Read writing', category: 'Navigate', action: () => navigate('/blog') },
     { label: 'Resume', category: 'Navigate', action: () => navigate('/resume') },
-    ...PROJECT_DATA.map((project) => ({
-      label: project.title,
+    ...PROJECT_DATA.flatMap(({ title, link }) => link ? [{
+      label: title,
       category: 'Projects',
-      action: () => navigate('/project'),
-    })),
+      action: () => {
+        window.open(link, '_blank', 'noopener,noreferrer');
+        setOpen(false);
+      },
+    }] : []),
     { label: `Switch to ${isDark ? 'light' : 'dark'} mode`, category: 'System', action: () => { toggleTheme(); setOpen(false); } },
     { label: copied ? 'Email copied' : 'Copy email address', category: 'System', action: copyEmail },
   ];
@@ -72,14 +75,14 @@ export function CommandPalette() {
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="hidden items-center gap-2 rounded-md border border-border bg-card/80 px-3 py-2 font-mono text-xs text-muted-foreground transition-colors hover:border-[var(--accent-green)] hover:text-foreground md:flex" aria-label="Open command palette">
+      <button type="button" onClick={() => setOpen(true)} className="hidden items-center gap-2 min-h-11 rounded-md border border-border bg-card/80 px-3 py-2 font-mono text-xs text-muted-foreground transition-colors hover:border-[var(--accent-green)] hover:text-foreground lg:flex" aria-label="Open command palette">
         <Search className="h-3.5 w-3.5" /><span>cmd</span><kbd className="rounded border border-border px-1.5 py-0.5 text-[10px]">⌘K</kbd>
       </button>
       {open ? (
         <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/60 p-4 pt-[14vh] backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Command palette" onMouseDown={() => setOpen(false)}>
-          <div className="w-full max-w-xl overflow-hidden rounded-lg border border-border bg-popover shadow-2xl" onMouseDown={(event) => event.stopPropagation()}>
+          <div className="flex max-h-[75dvh] w-full max-w-xl flex-col overflow-hidden rounded-lg border border-border bg-popover shadow-2xl" onMouseDown={(event) => event.stopPropagation()}>
             <div className="flex items-center gap-3 border-b border-border px-4 py-3"><Command className="h-4 w-4 text-[var(--accent-green)]" /><input ref={inputRef} value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={handleSearchKeyDown} aria-label="Command search" placeholder="Jump to a page or action..." className="w-full bg-transparent font-mono text-sm outline-none placeholder:text-muted-foreground" /></div>
-            <div className="p-2">
+            <div className="min-h-0 overflow-y-auto overscroll-contain p-2">
               {visibleItems.length === 0 ? (
                 <p className="px-3 py-6 text-center font-mono text-sm text-muted-foreground">No results found</p>
               ) : (
