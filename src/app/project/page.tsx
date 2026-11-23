@@ -21,7 +21,7 @@ const ProjectExplorer = dynamic(
 export const metadata: Metadata = {
   title: 'Project Hypergrid',
   description:
-    'Dive into the full matrix of trahoangdev projects, filter by stack or mission, and explore the supporting tool arsenal.',
+    'Explore selected projects by Uddhav Bhople, with links to the source code and the tools used to build them.',
 };
 
 // Enable ISR with 1 hour revalidation

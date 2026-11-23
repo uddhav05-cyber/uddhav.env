@@ -62,7 +62,7 @@ export const ConnectSection = memo(function ConnectSection({ activeSection = '',
       <h2 id="connect-heading" className="font-display text-4xl leading-tight sm:text-5xl">Let&apos;s Connect</h2>
       <p className="mt-3 max-w-lg text-muted-foreground">Open to internships, collaborations and product builds. Pick a topic and tell me what you are working on.</p>
 
-      <div className="mt-8 grid gap-10 md:grid-cols-[1.2fr_1fr]">
+      <div className="mt-8 grid gap-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <div role="group" aria-label="Topic" className="flex flex-wrap gap-2">
             {TOPICS.map((t) => (
@@ -71,7 +71,7 @@ export const ConnectSection = memo(function ConnectSection({ activeSection = '',
                 type="button"
                 aria-pressed={topic === t}
                 onClick={() => setTopic(t)}
-                className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${topic === t ? 'border-foreground bg-foreground text-background' : 'border-border hover:border-primary'}`}
+                className={`min-h-11 rounded-full border px-4 py-1.5 text-sm transition-colors ${topic === t ? 'border-foreground bg-foreground text-background' : 'border-border hover:border-primary'}`}
               >
                 {t}
               </button>
@@ -93,7 +93,7 @@ export const ConnectSection = memo(function ConnectSection({ activeSection = '',
             <button
               type="button"
               onClick={() => navigator.clipboard?.writeText(EMAIL).then(() => toast.success('Email copied')).catch(() => undefined)}
-              className="mt-2 font-mono text-xs uppercase tracking-wider text-primary"
+              className="mt-2 min-h-11 font-mono text-xs uppercase tracking-wider text-primary"
             >
               Copy email
             </button>
@@ -105,7 +105,7 @@ export const ConnectSection = memo(function ConnectSection({ activeSection = '',
                 href={generateConnectUrl(social.urlTemplate, social.handle)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex justify-between border-b border-border py-3 font-mono text-xs uppercase tracking-wider last:border-0 hover:text-primary"
+                className="flex min-h-11 items-center justify-between border-b border-border py-3 font-mono text-xs uppercase tracking-wider last:border-0 hover:text-primary"
               >
                 <span>{social.name}</span><span>↗</span>
               </Link>

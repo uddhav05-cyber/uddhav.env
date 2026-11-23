@@ -32,7 +32,7 @@ export function SiteFooter() {
           <p className="mb-3 uppercase tracking-wider text-foreground">Navigation</p>
           <div className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-1">
             {NAVIGATION_LINKS.map(([label, href]) => (
-              <Link key={href} href={href} className="transition-colors hover:text-primary">
+              <Link key={href} href={href} className="inline-flex min-h-11 items-center transition-colors hover:text-primary">
                 {label}
               </Link>
             ))}
@@ -46,14 +46,14 @@ export function SiteFooter() {
             <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" aria-hidden="true" />
             Open to Opportunities
           </span>
-          <Link href="/feed.xml" className="transition-colors hover:text-primary">
+          <Link href="/feed.xml" className="inline-flex min-h-11 items-center transition-colors hover:text-primary">
             RSS Feed
           </Link>
         </div>
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="self-start transition-colors hover:text-primary sm:self-auto"
+          className="min-h-11 self-start transition-colors hover:text-primary sm:self-auto"
         >
           Back to Top ↑
         </button>

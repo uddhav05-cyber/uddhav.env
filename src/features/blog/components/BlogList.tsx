@@ -105,7 +105,7 @@ export function BlogList({
                             className="group flex flex-col rounded-xl border border-border bg-card p-6 text-card-foreground shadow-sm transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-md"
                         >
                             <div className="flex items-start justify-between gap-4">
-                                <span className="rounded-md bg-blue-500/10 px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-blue-500">
+                                <span className="rounded-md bg-primary/10 px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-primary">
                                     {post.topicTag}
                                 </span>
                                 <time className="shrink-0 text-xs text-muted-foreground">{post.date}</time>
@@ -133,7 +133,7 @@ export function BlogList({
                         className="group flex flex-col rounded-xl border border-border bg-card p-6 text-card-foreground shadow-sm transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-md"
                     >
                         <div className="flex items-start justify-between gap-4">
-                            <span className="rounded-md bg-blue-500/10 px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-blue-500">
+                            <span className="rounded-md bg-primary/10 px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-primary">
                                 {post.topicTag}
                             </span>
                             <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">

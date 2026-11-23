@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { CommandPalette } from '@/features/tools/components/CommandPalette';
@@ -24,46 +24,49 @@ const NAV_ITEMS: NavItem[] = [
 
 export function HeaderNavigation() {
   const pathname = usePathname();
-  const [isVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDialogElement>(null);
 
-  // Lock body scroll when mobile menu is open
+  // Native modal dialogs contain focus and restore it to the menu button on close.
   useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
+    const menu = menuRef.current;
+    if (!isMobileMenuOpen) {
+      menu?.close();
+      return;
     }
+    const previousOverflow = document.body.style.overflow;
+    menu?.showModal();
+    document.body.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = 'unset';
+      menu?.close();
+      document.body.style.overflow = previousOverflow;
     };
   }, [isMobileMenuOpen]);
 
-  const visibilityClasses = cn(
-    'transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
-    isVisible || isMobileMenuOpen
-      ? 'translate-y-0 opacity-100'
-      : '-translate-y-8 opacity-0 pointer-events-none'
-  );
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    const closeOnDesktop = () => {
+      if (desktop.matches) setIsMobileMenuOpen(false);
+    };
+    desktop.addEventListener('change', closeOnDesktop);
+    return () => desktop.removeEventListener('change', closeOnDesktop);
+  }, []);
 
   return (
     <header className="fixed inset-x-0 top-0 z-[70] border-b border-border bg-background pt-[env(safe-area-inset-top)] print:hidden">
       <div
-        className={cn(
-          'relative z-50 mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-6 px-5 sm:px-8',
-          visibilityClasses
-        )}
+        className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-2 px-4 sm:gap-4 sm:px-8"
       >
         <Link
           href="/"
-          className="font-display text-2xl leading-none text-foreground transition-colors hover:text-primary z-50"
+          className="flex min-h-11 min-w-0 items-center font-display text-xl leading-none text-foreground transition-colors hover:text-primary sm:text-2xl"
           onClick={() => setIsMobileMenuOpen(false)}
         >
           Uddhav Bhople
         </Link>
 
         {/* Desktop Navigation */}
-        <nav aria-label="Main navigation" className="hidden md:flex items-center gap-6">
+        <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-5">
           {NAV_ITEMS.map((item) => {
             const active = item.isActive(pathname);
             const isExternal = item.href.startsWith('http');
@@ -76,7 +79,7 @@ export function HeaderNavigation() {
                 target={isExternal ? '_blank' : undefined}
                 rel={isExternal ? 'noopener noreferrer' : undefined}
                 className={cn(
-                  'font-mono text-xs uppercase tracking-wider transition-colors duration-200',
+                  'inline-flex min-h-11 items-center font-mono text-xs uppercase tracking-wider transition-colors duration-200',
                   'hover:text-primary',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                   active ? 'text-foreground' : 'text-muted-foreground'
@@ -87,11 +90,12 @@ export function HeaderNavigation() {
             );
           })}
         </nav>
-        <div className="flex items-center gap-3"><CommandPalette /><ThemeToggle /></div>
+        <div className="ml-auto flex shrink-0 items-center gap-2 lg:ml-0"><CommandPalette /><ThemeToggle />
 
         {/* Mobile Menu Toggle */}
         <button
-          className="relative z-50 p-2 -mr-2 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded md:hidden"
+          type="button"
+          className="flex h-11 w-11 items-center justify-center rounded text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:hidden"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={isMobileMenuOpen}
@@ -103,26 +107,30 @@ export function HeaderNavigation() {
             <Menu className="h-6 w-6" aria-hidden="true" />
           )}
         </button>
+        </div>
       </div>
 
       {/* Mobile Menu Overlay */}
-      <div
+      <dialog
+        ref={menuRef}
         id="mobile-menu"
-        className={cn(
-          'fixed inset-0 z-50 flex min-h-full w-full items-stretch justify-end overflow-y-auto bg-black/40 transition-all duration-500 md:hidden',
-          isMobileMenuOpen
-            ? 'opacity-100 pointer-events-auto'
-            : 'opacity-0 pointer-events-none'
-        )}
+        aria-label="Navigation menu"
+        className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none overflow-y-auto overscroll-contain border-0 bg-background text-foreground backdrop:bg-black/40"
+        onCancel={() => setIsMobileMenuOpen(false)}
+        onClose={() => setIsMobileMenuOpen(false)}
         onClick={(event) => {
           if (event.target === event.currentTarget) {
             setIsMobileMenuOpen(false);
           }
         }}
-        aria-hidden={!isMobileMenuOpen}
       >
-        <nav aria-label="Mobile navigation" className="ml-auto flex min-h-full w-full max-w-md flex-col items-center justify-center gap-8 overflow-y-auto bg-background px-6 pb-[env(safe-area-inset-bottom)] pt-20">
-          {NAV_ITEMS.map((item, index) => {
+        <div className="sticky top-0 flex justify-end bg-background px-4 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))]">
+          <button type="button" autoFocus onClick={() => setIsMobileMenuOpen(false)} aria-label="Close navigation menu" className="flex h-11 w-11 items-center justify-center rounded hover:text-primary">
+            <X className="h-6 w-6" aria-hidden="true" />
+          </button>
+        </div>
+        <nav aria-label="Mobile navigation" className="mx-auto flex w-full max-w-md flex-col items-stretch gap-2 px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4">
+          {NAV_ITEMS.map((item) => {
             const active = item.isActive(pathname);
             const isExternal = item.href.startsWith('http');
             return (
@@ -133,19 +141,18 @@ export function HeaderNavigation() {
                 target={isExternal ? '_blank' : undefined}
                 rel={isExternal ? 'noopener noreferrer' : undefined}
                 className={cn(
-                  'font-display text-4xl transition-all duration-300 transform',
-                  isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0',
+                  'flex min-h-12 items-center justify-center rounded px-4 py-3 font-display text-3xl sm:text-4xl',
                   'hover:text-primary',
                   active ? 'text-foreground' : 'text-muted-foreground'
                 )}
-                style={{ transitionDelay: `${index * 100}ms` }}
+                aria-current={active ? 'page' : undefined}
               >
                 {item.label}
               </Link>
             );
           })}
         </nav>
-      </div>
+      </dialog>
     </header>
   );
 }

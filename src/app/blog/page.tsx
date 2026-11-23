@@ -21,7 +21,7 @@ export default async function BlogPage() {
         <div className="container pt-24 pb-12 md:py-24 space-y-12 max-w-6xl mx-auto px-4">
             <div className="flex flex-col items-center text-center space-y-4 animate-in slide-in-from-bottom-5 fade-in duration-500">
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-                    <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl gradient-text">
+                    <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
                         My Blog
                     </h1>
                     <a
